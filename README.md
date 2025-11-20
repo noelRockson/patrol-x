@@ -82,7 +82,7 @@ La carte affiche les 7 principales communes de Port-au-Prince :
 - **Cité Soleil** (241,093 hab.)
 - **Tabarre** (118,477 hab.)
 
-Chaque commune a une couleur distincte et peut être sélectionnée pour voir l'état des lieux en temps réel.
+Chaque commune a une couleur distincte et peut être sélectionnée pour voir l'état des lieux en temps réel😊.
 
 ## 🎨 Logo
 
