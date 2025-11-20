@@ -1,0 +1,52 @@
+/* Import des styles Leaflet */
+@import 'leaflet/dist/leaflet.css';
+
+/* Styles personnalisés pour les labels des communes */
+.commune-label {
+  font-family: 'Inter', sans-serif;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.commune-label:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.commune-label-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Tooltip personnalisé */
+.commune-tooltip .leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  font-family: 'Inter', sans-serif;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Correction pour les icônes Leaflet par défaut */
+.leaflet-container {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Style pour les polygones sélectionnés */
+.leaflet-interactive.selected-commune {
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
