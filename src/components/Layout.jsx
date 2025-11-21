@@ -1,116 +1,133 @@
 import React, { useState, useEffect } from 'react'
+import { useStore } from '../context/store'
 import SidebarPriority from './SidebarPriority'
 import MapView from './MapView'
 import Chat from './Chat'
 import Logo from './Logo'
 
 const Layout = () => {
+  const { selectedZone } = useStore()
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [isPrioritiesOpen, setIsPrioritiesOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
 
-  // Détection de la taille d'écran
+  // Détection mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      // Sur mobile, masquer la sidebar par défaut
+      if (mobile) {
+        setShowSidebar(false)
+      } else {
+        setShowSidebar(true)
+      }
     }
     
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Fermer les panneaux lors du changement de vue mobile/desktop
+  // Ouvrir automatiquement le chat quand une zone est sélectionnée
   useEffect(() => {
-    if (!isMobile) {
-      setIsPrioritiesOpen(false)
+    if (selectedZone) {
+      setIsChatOpen(true)
+      // Sur mobile, fermer la sidebar pour voir le chat
+      if (isMobile) {
+        setShowSidebar(false)
+      }
     }
-  }, [isMobile])
+  }, [selectedZone, isMobile])
 
   return (
     <div className="h-screen flex flex-col relative">
       {/* Header avec logo */}
-      <div className="h-14 md:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
-        <div className="flex items-center gap-2 md:gap-3">
-          <Logo width={isMobile ? 28 : 32} height={isMobile ? 28 : 32} />
-          <h1 className="text-lg md:text-xl font-bold text-gray-900">Patrol-X</h1>
+      <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6 shrink-0">
+        <div className="flex items-center gap-3">
+          <Logo width={32} height={32} />
+          <h1 className="text-xl font-bold text-gray-900">Patrol-X</h1>
         </div>
-
-        {/* Menu burger pour mobile */}
-        {isMobile && (
-          <button
-            onClick={() => setIsPrioritiesOpen(!isPrioritiesOpen)}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Menu"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        )}
       </div>
 
       {/* Contenu principal */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Desktop: Colonne gauche - Priorités (toujours visible) */}
-        {!isMobile && (
-          <div className="w-1/3 lg:w-1/4 border-r border-gray-200">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Colonne gauche - Priorités (desktop) ou overlay (mobile) */}
+        {isMobile ? (
+          <>
+            {/* Bouton pour ouvrir la sidebar sur mobile */}
+            {!showSidebar && selectedZone && (
+              <button
+                onClick={() => setShowSidebar(true)}
+                className="absolute top-4 left-4 z-[1001] bg-white hover:bg-gray-50 text-gray-700 p-2 rounded-lg shadow-lg border border-gray-200 transition-all"
+                aria-label="Afficher les priorités"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </button>
+            )}
+            
+            {/* Sidebar en overlay sur mobile */}
+            {showSidebar && (
+              <>
+                <div
+                  className="absolute inset-0 bg-black/50 z-[2500]"
+                  onClick={() => setShowSidebar(false)}
+                />
+                <div className="absolute top-16 bottom-0 left-0 w-80 bg-white border-r border-gray-200 shadow-2xl z-[3000] flex flex-col">
+                  <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-base font-semibold text-gray-900">Priorités</h2>
+                    <button
+                      onClick={() => setShowSidebar(false)}
+                      className="p-1 text-gray-400 hover:text-gray-600"
+                      aria-label="Fermer"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    <SidebarPriority />
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="w-1/3 border-r border-gray-200 shrink-0">
             <SidebarPriority />
           </div>
         )}
 
-        {/* Mobile: Panneau Priorités en overlay */}
-        {isMobile && isPrioritiesOpen && (
-          <div className="absolute inset-0 z-[2000] bg-black/50" onClick={() => setIsPrioritiesOpen(false)}>
-            <div 
-              className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Priorités</h2>
-                <button
-                  onClick={() => setIsPrioritiesOpen(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="overflow-y-auto" style={{ height: 'calc(100% - 60px)' }}>
-                <SidebarPriority />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Carte (prend tout l'espace disponible) */}
-        <div className="flex-1 relative">
+        {/* Colonne droite - Carte */}
+        <div className={`flex-1 relative ${isMobile && showSidebar ? 'hidden' : ''}`}>
           <MapView />
           
           {/* Bouton flottant pour ouvrir le chat */}
           {!isChatOpen && (
             <button
               onClick={() => setIsChatOpen(true)}
-              className="fixed md:absolute bottom-4 md:bottom-6 right-4 md:right-6 z-[1001] bg-blue-600 hover:bg-blue-700 text-white p-3 md:p-4 rounded-full shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              className="absolute bottom-6 right-6 z-[1001] bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300"
               aria-label="Ouvrir le chat"
             >
               <svg
-                className="w-5 h-5 md:w-6 md:h-6"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
@@ -126,30 +143,46 @@ const Layout = () => {
 
       {/* Panneau de chat en overlay */}
       {isChatOpen && (
-        <>
-          {/* Overlay sombre pour mobile */}
-          {isMobile && (
-            <div 
-              className="fixed inset-0 bg-black/50 z-[1999]"
-              onClick={() => setIsChatOpen(false)}
-            />
-          )}
-          
-          {/* Panneau chat */}
-          <div className={`
-            fixed z-[2000] bg-white shadow-2xl flex flex-col
-            ${isMobile 
-              ? 'inset-x-0 bottom-0 rounded-t-2xl' 
-              : 'top-14 md:top-16 bottom-0 right-0 w-full md:w-1/2 lg:w-1/3 border-l border-gray-200'
-            }
-          `}
-          style={isMobile ? { height: '85vh' } : {}}
-          >
-            <Chat onClose={() => setIsChatOpen(false)} />
+        <div
+          className={`absolute top-16 bottom-0 right-0 bg-white border-l border-gray-200 shadow-2xl z-[2000] flex flex-col ${
+            isMobile ? 'w-full' : 'w-1/3'
+          }`}
+        >
+          <Chat 
+            onClose={() => setIsChatOpen(false)}
+            onShowPriorities={() => setShowSidebar(true)}
+          />
+        </div>
+      )}
+
+      {/* Bouton pour ouvrir la sidebar sur mobile (visible même avec le chat ouvert) */}
+      {isMobile && selectedZone && !showSidebar && (
+        <button
+          onClick={() => setShowSidebar(true)}
+          className="absolute top-20 left-4 z-[2001] bg-white hover:bg-gray-50 text-gray-700 p-2.5 rounded-lg shadow-lg border border-gray-200 transition-all"
+          aria-label="Afficher les priorités"
+        >
+          <div className="flex items-center gap-2">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            <span className="text-xs font-medium">Priorités</span>
           </div>
-        </>
+        </button>
       )}
     </div>
   )
 }
+
 export default Layout
+
