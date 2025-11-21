@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Polygon, Tooltip, Marker, useMap } from 'react
 import { useStore } from '../context/store'
 import { getZoneData } from '../api/api'
 import { portAuPrinceCommunes, communePolygons } from '../utils/communesData'
+import { haitiBounds, defaultCenter, minZoom, maxZoom, defaultZoom, portAuPrinceBounds } from '../utils/mapBounds'
 import L from 'leaflet'
 
 // Fix pour les icônes Leaflet par défaut
@@ -13,22 +14,41 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
-// Composant pour contrôler la carte (zoom, centrage)
-function MapController({ selectedZone, isMobile }) {
+// Composant pour contrôler les limites de la carte
+function MapBoundsController({ selectedZone, isMobile }) {
   const map = useMap()
   
   useEffect(() => {
+    // Définir les limites maximales (Haïti)
+    map.setMaxBounds(haitiBounds)
+    
+    // Empêcher le zoom trop loin
+    map.setMinZoom(minZoom)
+    map.setMaxZoom(maxZoom)
+    
+    // Recentrer si on sort des limites
+    map.on('drag', () => {
+      const currentBounds = map.getBounds()
+      if (!currentBounds.intersects(haitiBounds)) {
+        map.fitBounds(haitiBounds)
+      }
+    })
+    
+    // Gérer le zoom sur la zone sélectionnée
     if (selectedZone) {
       const commune = portAuPrinceCommunes.find(c => c.name === selectedZone)
       if (commune) {
-        map.flyTo(commune.center, isMobile ? 12 : 13, {
-          duration: 1
+        const zoomLevel = isMobile ? 12 : 13
+        map.flyTo(commune.center, zoomLevel, {
+          duration: 1,
+          maxZoom: maxZoom // Respecter le zoom maximum
         })
       }
     } else {
-      map.setView([18.550, -72.302], isMobile ? 10 : 11, {
-        animate: true,
-        duration: 1
+      // Recentrer sur Port-au-Prince si aucune sélection
+      map.flyTo(defaultCenter, defaultZoom, {
+        duration: 1,
+        maxZoom: maxZoom
       })
     }
   }, [selectedZone, map, isMobile])
@@ -36,58 +56,101 @@ function MapController({ selectedZone, isMobile }) {
   return null
 }
 
-// Composant pour afficher le polygone d'une commune
+// Composant pour forcer le rebond si l'utilisateur sort des limites
+function ForceBounds() {
+  const map = useMap()
+  
+  useEffect(() => {
+    const checkBounds = () => {
+      const currentCenter = map.getCenter()
+      const currentZoom = map.getZoom()
+      
+      // Vérifier si le centre est hors d'Haïti
+      if (currentCenter.lat < haitiBounds[0][0] || currentCenter.lat > haitiBounds[1][0] ||
+          currentCenter.lng < haitiBounds[0][1] || currentCenter.lng > haitiBounds[1][1]) {
+        
+        // Recentrer sur Haïti
+        map.flyTo(defaultCenter, Math.max(currentZoom, minZoom), {
+          duration: 1
+        })
+      }
+      
+      // Forcer le zoom dans les limites
+      if (currentZoom < minZoom) {
+        map.setZoom(minZoom)
+      } else if (currentZoom > maxZoom) {
+        map.setZoom(maxZoom)
+      }
+    }
+    
+    // Vérifier périodiquement et sur les événements de déplacement
+    map.on('moveend', checkBounds)
+    map.on('zoomend', checkBounds)
+    
+    const interval = setInterval(checkBounds, 1000) // Vérifier toutes les secondes
+    
+    return () => {
+      map.off('moveend', checkBounds)
+      map.off('zoomend', checkBounds)
+      clearInterval(interval)
+    }
+  }, [map])
+  
+  return null
+}
+
+// Composant pour afficher le polygone d'une commune avec style organique
 function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
-  const polygon = communePolygons[commune.id] || commune.bounds
-  
-  const positions = polygon.length > 2 
-    ? polygon 
-    : [
-        [commune.bounds[0][0], commune.bounds[0][1]],
-        [commune.bounds[0][0], commune.bounds[1][1]],
-        [commune.bounds[1][0], commune.bounds[1][1]],
-        [commune.bounds[1][0], commune.bounds[0][1]],
-        [commune.bounds[0][0], commune.bounds[0][1]]
-      ]
-  
-  const fillOpacity = isSelected ? 0.5 : 0.2
-  const weight = isSelected ? (isMobile ? 2 : 3) : 1
-  const opacity = isSelected ? 0.8 : 0.6
-  
+  // Utiliser le polygone organique s'il existe, sinon les bounds
+  const positions = commune.polygon || communePolygons[commune.id] || [
+    [commune.bounds[0][0], commune.bounds[0][1]],
+    [commune.bounds[0][0], commune.bounds[1][1]],
+    [commune.bounds[1][0], commune.bounds[1][1]],
+    [commune.bounds[1][0], commune.bounds[0][1]],
+    [commune.bounds[0][0], commune.bounds[0][1]]
+  ]
+
+  // Styles dynamiques avec effets améliorés
+  const getPolygonStyle = () => {
+    const baseStyle = {
+      fillColor: commune.color,
+      color: isSelected ? '#ffffff' : commune.color,
+      weight: isSelected ? 3 : 2,
+      opacity: isSelected ? 0.9 : 0.7,
+      fillOpacity: isSelected ? 0.3 : 0.15,
+      dashArray: isSelected ? '0' : '5,5',
+      lineCap: 'round',
+      lineJoin: 'round'
+    }
+
+    return baseStyle
+  }
+
   return (
     <Polygon
       positions={positions}
-      pathOptions={{
-        fillColor: commune.color,
-        color: commune.color,
-        weight: weight,
-        opacity: opacity,
-        fillOpacity: fillOpacity
-      }}
+      pathOptions={getPolygonStyle()}
       eventHandlers={{
         click: () => onClick(commune.name),
         mouseover: (e) => {
           if (!isMobile) {
             const layer = e.target
             layer.setStyle({
-              weight: 2,
-              opacity: 0.8,
-              fillOpacity: 0.3
+              weight: 3,
+              opacity: 0.9,
+              fillOpacity: 0.25,
+              dashArray: '0'
             })
           }
         },
         mouseout: (e) => {
           if (!isMobile) {
             const layer = e.target
-            layer.setStyle({
-              weight: weight,
-              opacity: opacity,
-              fillOpacity: fillOpacity
-            })
+            layer.setStyle(getPolygonStyle())
           }
         }
       }}
-      className={isSelected ? 'selected-commune' : ''}
+      className={`commune-polygon commune-${commune.id} ${isSelected ? 'selected-commune' : ''}`}
     >
       <Tooltip 
         permanent={false} 
@@ -95,7 +158,7 @@ function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
         className="commune-tooltip"
         opacity={1}
       >
-        <div className="text-center">
+        <div className="text-center min-w-[120px]">
           <strong className="text-xs md:text-sm">{commune.name}</strong>
           <br />
           <span className="text-[10px] md:text-xs text-gray-600">
@@ -172,18 +235,24 @@ const MapView = () => {
 
       <div className="h-full pt-16 md:pt-20 pb-2 md:pb-4 px-2 md:px-4">
         <MapContainer
-          center={[18.594, -72.302]}
-          zoom={isMobile ? 10 : 11}
+          center={defaultCenter}
+          zoom={defaultZoom}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          maxBounds={haitiBounds}
+          maxBoundsViscosity={1.0} // Force le rebond aux limites
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg shadow-lg z-0"
           scrollWheelZoom={true}
           touchZoom={true}
           dragging={true}
           tap={true}
+          bounceAtZoomLimits={true} // Rebond aux limites de zoom
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            bounds={haitiBounds} // Limiter le chargement des tuiles à Haïti
           />
           
           {portAuPrinceCommunes.map(commune => (
@@ -204,7 +273,8 @@ const MapView = () => {
             />
           ))}
           
-          <MapController selectedZone={selectedZone} isMobile={isMobile} />
+          <MapBoundsController selectedZone={selectedZone} isMobile={isMobile} />
+          <ForceBounds />
         </MapContainer>
       </div>
 
@@ -212,6 +282,9 @@ const MapView = () => {
         <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 border border-gray-200 max-w-md mx-auto">
           <p className="text-[10px] md:text-xs text-gray-600 text-center">
             {isMobile ? 'Touchez' : 'Cliquez sur'} une commune pour voir l'état des lieux
+          </p>
+          <p className="text-[9px] md:text-[10px] text-gray-500 text-center mt-1">
+            Zone limitée à Haïti • Zoom: {minZoom}-{maxZoom}
           </p>
         </div>
       </div>
