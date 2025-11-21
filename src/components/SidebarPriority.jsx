@@ -27,43 +27,37 @@ const SidebarPriority = () => {
   ]
 
   return (
-    <div className="h-full bg-white">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Priorités</h2>
+    <div className="h-full bg-white flex flex-col">
+      <div className="hidden md:block px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 shrink-0">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900">Priorités</h2>
       </div>
 
-      {/* Content */}
-      <div className="px-6 py-6">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6">
         {isDisabled ? (
-          <div className="text-center text-gray-400 py-12">
-            <p className="text-sm">
+          <div className="text-center text-gray-400 py-8 md:py-12">
+            <p className="text-xs md:text-sm">
               Sélectionnez une zone sur la carte pour afficher les priorités.
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {categories.map((category, index) => (
               <div
                 key={index}
-                className={`p-4 rounded-lg border-2 border-gray-200 transition-all ${
+                className={`p-3 md:p-4 rounded-lg border-2 border-gray-200 transition-all ${
                   isDisabled
                     ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:border-gray-300 cursor-pointer'
+                    : 'hover:border-gray-300 cursor-pointer active:scale-95'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{category.emoji}</span>
-                    <span className="font-medium text-gray-900">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <span className="text-xl md:text-2xl">{category.emoji}</span>
+                    <span className="font-medium text-sm md:text-base text-gray-900">
                       {category.label}
                     </span>
                   </div>
-                  <span
-                    className={`text-xl font-bold ${category.color} ${
-                      isDisabled ? 'opacity-50' : ''
-                    }`}
-                  >
+                  <span className={`text-lg md:text-xl font-bold ${category.color} ${isDisabled ? 'opacity-50' : ''}`}>
                     {category.count}
                   </span>
                 </div>
@@ -77,4 +71,3 @@ const SidebarPriority = () => {
 }
 
 export default SidebarPriority
-

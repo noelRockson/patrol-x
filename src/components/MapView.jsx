@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Polygon, Tooltip, Marker, useMap } from 'react-leaflet'
 import { useStore } from '../context/store'
 import { getZoneData } from '../api/api'
@@ -14,45 +14,44 @@ L.Icon.Default.mergeOptions({
 })
 
 // Composant pour contrôler la carte (zoom, centrage)
-function MapController({ selectedZone }) {
+function MapController({ selectedZone, isMobile }) {
   const map = useMap()
   
   useEffect(() => {
     if (selectedZone) {
       const commune = portAuPrinceCommunes.find(c => c.name === selectedZone)
       if (commune) {
-        map.flyTo(commune.center, 13, {
+        map.flyTo(commune.center, isMobile ? 12 : 13, {
           duration: 1
         })
       }
     } else {
-      map.setView([18.550, -72.302], 11, {
+      map.setView([18.550, -72.302], isMobile ? 10 : 11, {
         animate: true,
         duration: 1
       })
     }
-  }, [selectedZone, map])
+  }, [selectedZone, map, isMobile])
   
   return null
 }
 
 // Composant pour afficher le polygone d'une commune
-function CommunePolygon({ commune, isSelected, onClick }) {
+function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
   const polygon = communePolygons[commune.id] || commune.bounds
   
-  // Créer un rectangle à partir des bounds si pas de polygone
   const positions = polygon.length > 2 
     ? polygon 
     : [
-        [commune.bounds[0][0], commune.bounds[0][1]], // Sud-ouest
-        [commune.bounds[0][0], commune.bounds[1][1]], // Nord-ouest
-        [commune.bounds[1][0], commune.bounds[1][1]], // Nord-est
-        [commune.bounds[1][0], commune.bounds[0][1]], // Sud-est
-        [commune.bounds[0][0], commune.bounds[0][1]] // Fermeture
+        [commune.bounds[0][0], commune.bounds[0][1]],
+        [commune.bounds[0][0], commune.bounds[1][1]],
+        [commune.bounds[1][0], commune.bounds[1][1]],
+        [commune.bounds[1][0], commune.bounds[0][1]],
+        [commune.bounds[0][0], commune.bounds[0][1]]
       ]
   
   const fillOpacity = isSelected ? 0.5 : 0.2
-  const weight = isSelected ? 3 : 1
+  const weight = isSelected ? (isMobile ? 2 : 3) : 1
   const opacity = isSelected ? 0.8 : 0.6
   
   return (
@@ -68,20 +67,24 @@ function CommunePolygon({ commune, isSelected, onClick }) {
       eventHandlers={{
         click: () => onClick(commune.name),
         mouseover: (e) => {
-          const layer = e.target
-          layer.setStyle({
-            weight: 2,
-            opacity: 0.8,
-            fillOpacity: 0.3
-          })
+          if (!isMobile) {
+            const layer = e.target
+            layer.setStyle({
+              weight: 2,
+              opacity: 0.8,
+              fillOpacity: 0.3
+            })
+          }
         },
         mouseout: (e) => {
-          const layer = e.target
-          layer.setStyle({
-            weight: weight,
-            opacity: opacity,
-            fillOpacity: fillOpacity
-          })
+          if (!isMobile) {
+            const layer = e.target
+            layer.setStyle({
+              weight: weight,
+              opacity: opacity,
+              fillOpacity: fillOpacity
+            })
+          }
         }
       }}
       className={isSelected ? 'selected-commune' : ''}
@@ -93,9 +96,11 @@ function CommunePolygon({ commune, isSelected, onClick }) {
         opacity={1}
       >
         <div className="text-center">
-          <strong className="text-sm">{commune.name}</strong>
+          <strong className="text-xs md:text-sm">{commune.name}</strong>
           <br />
-          <span className="text-xs text-gray-600">{commune.population.toLocaleString()} hab.</span>
+          <span className="text-[10px] md:text-xs text-gray-600">
+            {commune.population.toLocaleString()} hab.
+          </span>
         </div>
       </Tooltip>
     </Polygon>
@@ -103,16 +108,16 @@ function CommunePolygon({ commune, isSelected, onClick }) {
 }
 
 // Composant pour afficher le nom de la commune au centre
-function CommuneLabel({ commune }) {
+function CommuneLabel({ commune, isMobile }) {
   const customIcon = new L.DivIcon({
     html: `
       <div class="commune-label bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-gray-300 shadow-lg">
-        <span class="font-bold text-sm text-gray-800 whitespace-nowrap">${commune.name}</span>
+        <span class="font-bold ${isMobile ? 'text-xs' : 'text-sm'} text-gray-800 whitespace-nowrap">${commune.name}</span>
       </div>
     `,
     className: 'commune-label-container',
-    iconSize: [100, 40],
-    iconAnchor: [50, 20]
+    iconSize: isMobile ? [80, 30] : [100, 40],
+    iconAnchor: isMobile ? [40, 15] : [50, 20]
   })
 
   return (
@@ -126,6 +131,18 @@ function CommuneLabel({ commune }) {
 
 const MapView = () => {
   const { selectedZone, setSelectedZone, setZoneData, setPriorities, setIsLoading } = useStore()
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleCommuneClick = async (communeName) => {
     if (selectedZone === communeName) return
@@ -148,53 +165,53 @@ const MapView = () => {
 
   return (
     <div className="h-full bg-gray-50 relative overflow-hidden">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] px-6 py-4 bg-white/90 backdrop-blur-sm border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Carte interactive</h2>
-        <p className="text-sm text-gray-500 mt-1">Port-au-Prince, Haïti</p>
+      <div className="absolute top-0 left-0 right-0 z-[1000] px-3 md:px-6 py-3 md:py-4 bg-white/90 backdrop-blur-sm border-b border-gray-200">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900">Carte interactive</h2>
+        <p className="text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">Port-au-Prince, Haïti</p>
       </div>
 
-      {/* Map Container */}
-      <div className="h-full pt-20 pb-4 px-4">
+      <div className="h-full pt-16 md:pt-20 pb-2 md:pb-4 px-2 md:px-4">
         <MapContainer
-          center={[18.550, -72.302]} // Centré sur Delmas
-          zoom={11}
+          center={[18.594, -72.302]}
+          zoom={isMobile ? 10 : 11}
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg shadow-lg z-0"
           scrollWheelZoom={true}
+          touchZoom={true}
+          dragging={true}
+          tap={true}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {/* Affichage des polygones des communes */}
           {portAuPrinceCommunes.map(commune => (
             <CommunePolygon 
               key={commune.id}
               commune={commune}
               isSelected={selectedZone === commune.name}
               onClick={handleCommuneClick}
+              isMobile={isMobile}
             />
           ))}
           
-          {/* Marqueurs de centre avec noms des communes */}
           {portAuPrinceCommunes.map(commune => (
             <CommuneLabel 
               key={commune.id}
               commune={commune}
+              isMobile={isMobile}
             />
           ))}
           
-          <MapController selectedZone={selectedZone} />
+          <MapController selectedZone={selectedZone} isMobile={isMobile} />
         </MapContainer>
       </div>
 
-      {/* Légende ou instructions */}
-      <div className="absolute bottom-4 left-4 right-4 z-[1000] pointer-events-none">
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200 max-w-md mx-auto">
-          <p className="text-xs text-gray-600 text-center">
-            Cliquez sur une commune pour voir l'état des lieux
+      <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 z-[1000] pointer-events-none">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 border border-gray-200 max-w-md mx-auto">
+          <p className="text-[10px] md:text-xs text-gray-600 text-center">
+            {isMobile ? 'Touchez' : 'Cliquez sur'} une commune pour voir l'état des lieux
           </p>
         </div>
       </div>

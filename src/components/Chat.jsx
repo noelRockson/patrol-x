@@ -3,12 +3,23 @@ import { useStore } from '../context/store'
 import { askQuestion } from '../api/api'
 import ChatMessage from './ChatMessage'
 
-const Chat = () => {
+const Chat = ({ onClose }) => {
   const { selectedZone, zoneData, messages, addMessage, setMessages, setIsLoading, isLoading } = useStore()
   const [inputValue, setInputValue] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
   const messagesEndRef = useRef(null)
 
-  // Message initial
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([
@@ -21,7 +32,6 @@ const Chat = () => {
     }
   }, [messages.length, setMessages])
 
-  // Ajouter le résumé de la zone quand elle est sélectionnée
   useEffect(() => {
     if (zoneData && selectedZone) {
       const summaryMessage = {
@@ -30,7 +40,6 @@ const Chat = () => {
         timestamp: Date.now(),
       }
       
-      // Vérifier si le message n'existe pas déjà
       const exists = messages.some(
         (msg) => msg.text.includes(`**État des lieux — ${selectedZone}**`)
       )
@@ -41,7 +50,6 @@ const Chat = () => {
     }
   }, [zoneData, selectedZone, messages, addMessage])
 
-  // Scroll automatique vers le bas
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -85,53 +93,57 @@ const Chat = () => {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Chat IA</h2>
-        {selectedZone && (
-          <p className="text-sm text-gray-500 mt-1">Zone : {selectedZone}</p>
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 flex items-center justify-between shrink-0">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900">Chat IA</h2>
+          {selectedZone && (
+            <p className="text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1 truncate">
+              Zone : {selectedZone}
+            </p>
+          )}
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="ml-2 md:ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 shrink-0"
+            aria-label="Fermer le chat"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         )}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-3 md:py-4">
         {messages.map((msg, index) => (
-          <ChatMessage
-            key={index}
-            message={msg.text}
-            isUser={msg.isUser}
-          />
+          <ChatMessage key={index} message={msg.text} isUser={msg.isUser} />
         ))}
         {isLoading && (
-          <div className="text-gray-500 text-sm italic">
+          <div className="text-gray-500 text-xs md:text-sm italic">
             En cours de traitement...
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-6 py-4 border-t border-gray-200">
+      <div className="px-3 md:px-6 py-3 md:py-4 border-t border-gray-200 shrink-0">
         <form onSubmit={handleSubmit}>
           <div className="flex gap-2">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={
-                selectedZone
-                  ? 'Tapez votre question...'
-                  : 'Sélectionnez une zone d\'abord'
-              }
+              placeholder={selectedZone ? 'Tapez votre question...' : 'Sélectionnez une zone d\'abord'}
               disabled={!selectedZone || isLoading}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="flex-1 px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <button
               type="submit"
               disabled={!selectedZone || !inputValue.trim() || isLoading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 md:px-6 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shrink-0"
             >
-              Envoyer
+              {isMobile ? '→' : 'Envoyer'}
             </button>
           </div>
         </form>
@@ -141,4 +153,3 @@ const Chat = () => {
 }
 
 export default Chat
-
