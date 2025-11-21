@@ -108,13 +108,86 @@ export const askQuestion = async (zone, query) => {
   // Simulation de réponses basées sur la requête
   const lowerQuery = query.toLowerCase()
 
+  // Si pas de zone spécifiée, répondre de manière générale
+  if (!zone) {
+    if (lowerQuery.includes('urgence') || lowerQuery.includes('urgent')) {
+      return {
+        data: {
+          response: `🚨 Informations sur les urgences à Port-au-Prince:\n\n• Plusieurs incidents critiques signalés\n• Interventions en cours dans différentes zones\n• Pour des informations spécifiques sur une zone, sélectionnez-la sur la carte\n\nDernière mise à jour : il y a 5 minutes`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    if (lowerQuery.includes('circulation') || lowerQuery.includes('route') || lowerQuery.includes('trafic')) {
+      return {
+        data: {
+          response: `🚧 État général de la circulation à Port-au-Prince:\n\n• Quelques blocages routiers signalés\n• Circulation fluide dans la plupart des zones\n• Pour des détails sur une zone spécifique, sélectionnez-la sur la carte\n\nMise à jour : il y a 3 minutes`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    if (lowerQuery.includes('sécurité') || lowerQuery.includes('securite') || lowerQuery.includes('safety')) {
+      return {
+        data: {
+          response: `🛡️ Niveau de sécurité général:\n\n• Situation sous surveillance dans l'ensemble de la ville\n• Forces de l'ordre présentes\n• Restez vigilant\n• Pour des informations détaillées sur une zone, sélectionnez-la sur la carte\n\nDernière alerte : il y a 10 minutes`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    if (lowerQuery.includes('météo') || lowerQuery.includes('meteo') || lowerQuery.includes('weather')) {
+      return {
+        data: {
+          response: `🌤️ Conditions météorologiques — Port-au-Prince:\n\n• Température : 28°C\n• Ciel dégagé\n• Visibilité : bonne\n• Aucune alerte météo\n\nConditions similaires dans toutes les zones`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    if (lowerQuery.includes('bonjour') || lowerQuery.includes('salut') || lowerQuery.includes('hello')) {
+      return {
+        data: {
+          response: `Bonjour ! 👋\n\nJe suis votre assistant Patrol-X. Je peux vous aider avec :\n• Informations sur les zones de Port-au-Prince\n• Urgences et incidents\n• État de la circulation\n• Sécurité\n• Météo\n\nPour des informations spécifiques sur une zone, sélectionnez-la sur la carte !`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    if (lowerQuery.includes('aide') || lowerQuery.includes('help')) {
+      return {
+        data: {
+          response: `💬 Voici comment je peux vous aider :\n\n• Posez-moi des questions sur les zones de Port-au-Prince\n• Sélectionnez une zone sur la carte pour voir son état des lieux\n• Demandez des informations sur : urgences, circulation, sécurité, météo\n\nJe suis là pour vous informer en temps réel !`,
+          zone: null,
+          query,
+        },
+      }
+    }
+
+    // Réponse par défaut sans zone
+    return {
+      data: {
+        response: `📊 J'ai bien reçu votre question : "${query}"\n\nPour vous donner des informations précises, vous pouvez :\n• Sélectionner une zone spécifique sur la carte\n• Me poser des questions générales sur : urgences, circulation, sécurité, météo\n\nQue souhaitez-vous savoir ?`,
+        zone: null,
+        query,
+      },
+    }
+  }
+
+  // Réponses avec zone spécifiée
   if (lowerQuery.includes('urgence') || lowerQuery.includes('urgent')) {
     return {
       data: {
         response: `🚨 Urgences détectées dans ${zone}:\n\n• 2 incidents critiques signalés\n• Intervention en cours\n• Évitez la zone si possible\n\nDernière mise à jour : il y a 5 minutes`,
-      zone,
-      query,
-    },
+        zone,
+        query,
+      },
     }
   }
 
@@ -122,9 +195,9 @@ export const askQuestion = async (zone, query) => {
     return {
       data: {
         response: `🚧 État de la circulation — ${zone}:\n\n• Blocages routiers sur la route principale\n• Déviation recommandée via les rues secondaires\n• Temps de trajet estimé : +15 minutes\n\nMise à jour : il y a 3 minutes`,
-      zone,
-      query,
-    },
+        zone,
+        query,
+      },
     }
   }
 
@@ -132,9 +205,9 @@ export const askQuestion = async (zone, query) => {
     return {
       data: {
         response: `🛡️ Niveau de sécurité — ${zone}:\n\n• Situation sous surveillance\n• Forces de l'ordre présentes\n• Restez vigilant\n\nDernière alerte : il y a 10 minutes`,
-      zone,
-      query,
-    },
+        zone,
+        query,
+      },
     }
   }
 
@@ -142,13 +215,13 @@ export const askQuestion = async (zone, query) => {
     return {
       data: {
         response: `🌤️ Conditions météorologiques — ${zone}:\n\n• Température : 28°C\n• Ciel dégagé\n• Visibilité : bonne\n• Aucune alerte météo`,
-      zone,
-      query,
-    },
+        zone,
+        query,
+      },
     }
   }
 
-  // Réponse par défaut
+  // Réponse par défaut avec zone
   return {
     data: {
       response: `📊 Analyse de votre demande concernant "${query}" dans ${zone}:\n\nLes données sont en cours de traitement. Pour des informations plus précises, essayez de demander :\n• urgences\n• circulation\n• sécurité\n• météo`,

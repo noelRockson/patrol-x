@@ -29,7 +29,7 @@ const Layout = () => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Ouvrir automatiquement le chat quand une zone est sélectionnée
+  // Ouvrir automatiquement le chat quand une zone est sélectionnée (mais permettre aussi l'ouverture manuelle)
   useEffect(() => {
     if (selectedZone) {
       setIsChatOpen(true)

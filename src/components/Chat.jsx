@@ -23,7 +23,7 @@ const Chat = ({ onClose, onShowPriorities }) => {
     if (messages.length === 0) {
       setMessages([
         {
-          text: 'Sélectionnez une zone sur la carte pour voir l\'état des lieux en temps réel.',
+          text: 'Bonjour ! Je suis votre assistant Patrol-X. Vous pouvez me poser des questions sur les zones de Port-au-Prince, ou discuter avec moi. Pour voir l\'état des lieux d\'une zone spécifique, sélectionnez-la sur la carte.',
           isUser: false,
           timestamp: Date.now(),
         },
@@ -59,7 +59,7 @@ const Chat = ({ onClose, onShowPriorities }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!inputValue.trim() || !selectedZone || isLoading) return
+    if (!inputValue.trim() || isLoading) return
 
     const userMessage = {
       text: inputValue,
@@ -68,19 +68,34 @@ const Chat = ({ onClose, onShowPriorities }) => {
     }
 
     addMessage(userMessage)
+    const question = inputValue
     setInputValue('')
     setIsLoading(true)
 
     try {
-      const response = await askQuestion(selectedZone, inputValue)
-      
-      const aiMessage = {
-        text: response.data.response,
-        isUser: false,
-        timestamp: Date.now(),
-      }
+      // Si une zone est sélectionnée, utiliser l'API avec zone
+      if (selectedZone) {
+        const response = await askQuestion(selectedZone, question)
+        
+        const aiMessage = {
+          text: response.data.response,
+          isUser: false,
+          timestamp: Date.now(),
+        }
 
-      addMessage(aiMessage)
+        addMessage(aiMessage)
+      } else {
+        // Sinon, répondre de manière générale
+        const response = await askQuestion(null, question)
+        
+        const aiMessage = {
+          text: response.data.response,
+          isUser: false,
+          timestamp: Date.now(),
+        }
+
+        addMessage(aiMessage)
+      }
     } catch (error) {
       const errorMessage = {
         text: '❌ Erreur lors de la récupération des données. Veuillez réessayer.',
@@ -167,17 +182,13 @@ const Chat = ({ onClose, onShowPriorities }) => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={
-                selectedZone
-                  ? 'Tapez votre question...'
-                  : 'Sélectionnez une zone d\'abord'
-              }
-              disabled={!selectedZone || isLoading}
+              placeholder="Tapez votre question ou message..."
+              disabled={isLoading}
               className="flex-1 px-3 md:px-4 py-2 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <button
               type="submit"
-              disabled={!selectedZone || !inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || isLoading}
               className="px-4 md:px-6 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Envoyer
