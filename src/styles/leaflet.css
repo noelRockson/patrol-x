@@ -1,6 +1,26 @@
 /* Import des styles Leaflet */
 @import 'leaflet/dist/leaflet.css';
 
+/* Performance: Désactiver les animations pour prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .commune-polygon,
+  .selected-commune,
+  .commune-high-alert,
+  .commune-alert-low,
+  .commune-alert-medium,
+  .commune-alert-high {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* GPU acceleration pour meilleure performance */
+.commune-polygon {
+  will-change: opacity, filter;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 /* Styles personnalisés pour les labels des communes */
 .commune-label {
   font-family: 'Inter', sans-serif;
@@ -39,7 +59,6 @@
   border-bottom-color: rgba(255, 255, 255, 0.95) !important;
 }
 
-/* Correction pour les icônes Leaflet par défaut */
 .leaflet-container {
   font-family: 'Inter', sans-serif;
 }
@@ -55,7 +74,6 @@
   touch-action: pan-x pan-y;
 }
 
-/* Indication visuelle quand on atteint les limites */
 .leaflet-container.reached-bounds {
   cursor: not-allowed;
 }
@@ -66,7 +84,7 @@
   transition: transform 0.25s cubic-bezier(0,0,0.25,1);
 }
 
-/* ANIMATIONS POUR LES COMMUNES - NOUVEAU */
+/* ANIMATIONS OPTIMISÉES */
 @keyframes pulse {
   0% {
     opacity: 0.4;
@@ -112,7 +130,6 @@
   }
 }
 
-/* Styles pour les polygones organiques */
 .commune-polygon {
   transition: all 0.3s ease;
 }
@@ -126,12 +143,10 @@
   filter: drop-shadow(0 0 20px currentColor);
 }
 
-/* Effet de brillance pour les communes avec beaucoup d'incidents */
 .commune-high-alert {
   animation: sparkle 1.5s ease-in-out infinite !important;
 }
 
-/* Animation de scintillement basée sur le nombre d'incidents */
 .commune-alert-low {
   animation: glow 3s ease-in-out infinite !important;
 }
@@ -144,7 +159,6 @@
   animation: glow 1s ease-in-out infinite !important;
 }
 
-/* Gradient animé pour les bordures */
 .animated-border {
   background: linear-gradient(
     90deg,
