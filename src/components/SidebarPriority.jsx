@@ -112,9 +112,29 @@ const SidebarPriority = ({ isMobile = false }) => {
       {!isMobile && (
         <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Priorités</h2>
-          {selectedZone && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Zone : {selectedZone}</p>
+          
+          {/* AFFICHAGE DES ZONES (CHIPS/TAGS) - NOUVEAU CODE */}
+          {selectedZone.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {selectedZone.map((zone, index) => (
+                <div 
+                  key={index} 
+                  // Ceci est le design du 'Tag' ou 'Chip'
+                  // J'ajoute un petit 'x' pour simuler la suppression
+                  className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 shadow-sm"
+                >
+                  <span className="mr-1">{zone}</span>
+                  {/* Optionnel: Ajoutez un bouton 'X' pour la suppression */}
+                  {/* <button className="ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                          onClick={() => handleRemoveZone(zone)}>
+                      &times;
+                  </button> */}
+                </div>
+              ))}
+            </div>
           )}
+          {/* FIN DE L'AFFICHAGE DES ZONES */}
+          
         </div>
       )}
 

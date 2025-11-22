@@ -5,12 +5,13 @@ import { askQuestion } from '../api/api'
 import ChatMessage from './ChatMessage'
 
 const Chat = ({ onClose, isMobile }) => {
-  const { selectedZone, zoneData, messages, addMessage, setMessages, setIsLoading, isLoading } = useStore()
+  const { selectedZone, activeZone, zoneData, messages, addMessage, setMessages, setIsLoading, isLoading } = useStore()
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
-    if (messages.length === 0) {
+    // Ne pas afficher le message initial si on a déjà des données ou des messages
+    if (messages.length === 0 && !zoneData) {
       setMessages([
         {
           text: 'Bonjour ! Je suis votre assistant Patrol-X. Vous pouvez me poser des questions sur les zones de Port-au-Prince, ou discuter avec moi. Pour voir l\'état des lieux d\'une zone spécifique, sélectionnez-la sur la carte.',
@@ -19,25 +20,40 @@ const Chat = ({ onClose, isMobile }) => {
         },
       ])
     }
-  }, [messages.length, setMessages])
+  }, [messages.length, setMessages, zoneData])
 
   useEffect(() => {
-    if (zoneData && selectedZone) {
+    // Afficher l'état des lieux seulement si une zone est sélectionnée (pas l'état général)
+    const hasSelectedZone = selectedZone && selectedZone.length > 0
+    if (zoneData && zoneData.summary && hasSelectedZone) {
+      // Utiliser activeZone pour le résumé, sinon la dernière zone sélectionnée
+      const zoneToShow = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
+      
+      // Ne pas afficher l'état général dans le chat
+      const isGeneral = zoneData.zone && zoneData.zone.includes('Général')
+      if (isGeneral) {
+        return // Ne pas afficher l'état général dans le chat
+      }
+      
+      const messageText = `**État des lieux — ${zoneToShow || zoneData.zone}**\n\n${zoneData.summary}`
+      
       const summaryMessage = {
-        text: `**État des lieux — ${selectedZone}**\n\n${zoneData.summary}`,
+        text: messageText,
         isUser: false,
         timestamp: Date.now(),
       }
       
+      // Vérifier si le message existe déjà pour éviter les doublons
+      const messageKey = zoneToShow || zoneData.zone
       const exists = messages.some(
-        (msg) => msg.text.includes(`**État des lieux — ${selectedZone}**`)
+        (msg) => msg.text.includes(messageKey) && msg.text.includes('État des lieux')
       )
       
       if (!exists) {
         addMessage(summaryMessage)
       }
     }
-  }, [zoneData, selectedZone, messages, addMessage])
+  }, [zoneData, activeZone, selectedZone, messages, addMessage])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -60,8 +76,9 @@ const Chat = ({ onClose, isMobile }) => {
     setIsLoading(true)
 
     try {
-      // Si une zone est sélectionnée, utiliser l'API avec zone, sinon sans zone
-      const response = await askQuestion(selectedZone || null, question)
+      // Utiliser activeZone pour l'API, sinon la dernière zone sélectionnée, ou null si aucune zone
+      const zoneToUse = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
+      const response = await askQuestion(zoneToUse || null, question)
       
       const aiMessage = {
         text: response.data.response,
@@ -88,9 +105,18 @@ const Chat = ({ onClose, isMobile }) => {
       <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white dark:bg-gray-800">
         <div className="flex-1 min-w-0">
           <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Chat IA</h2>
-          {selectedZone && (
+          {(selectedZone && selectedZone.length > 0) ? (
             <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              Zone : {selectedZone}
+              {activeZone 
+                ? `Zone active : ${activeZone}`
+                : selectedZone.length === 1 
+                  ? `Zone : ${selectedZone[0]}`
+                  : `Zones (${selectedZone.length}) : ${selectedZone.join(', ')}`
+              }
+            </p>
+          ) : (
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+              Vue d'ensemble — Port-au-Prince
             </p>
           )}
         </div>

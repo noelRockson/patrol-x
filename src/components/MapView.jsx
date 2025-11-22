@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 })
 
 // Composant pour contrôler les limites de la carte
-function MapBoundsController({ selectedZone, isMobile }) {
+function MapBoundsController({ selectedZone, activeZone, isMobile }) {
   const map = useMap()
   
   useEffect(() => {
@@ -34,9 +34,10 @@ function MapBoundsController({ selectedZone, isMobile }) {
       }
     })
     
-    // Gérer le zoom sur la zone sélectionnée
-    if (selectedZone) {
-      const commune = portAuPrinceCommunes.find(c => c.name === selectedZone)
+    // Gérer le zoom sur la zone active, sinon la dernière zone sélectionnée
+    const zoneToZoom = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
+    if (zoneToZoom) {
+      const commune = portAuPrinceCommunes.find(c => c.name === zoneToZoom)
       if (commune) {
         const zoomLevel = isMobile ? 12 : 13
         map.flyTo(commune.center, zoomLevel, {
@@ -51,7 +52,7 @@ function MapBoundsController({ selectedZone, isMobile }) {
         maxZoom: maxZoom
       })
     }
-  }, [selectedZone, map, isMobile])
+  }, [selectedZone, activeZone, map, isMobile])
   
   return null
 }
@@ -106,7 +107,7 @@ function ForceBounds() {
 }
 
 // Composant pour afficher le polygone d'une commune avec style organique
-function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
+function CommunePolygon({ commune, isSelected, isActive, onClick, isMobile }) {
   // Utiliser le polygone organique s'il existe, sinon les bounds
   const positions = commune.polygon || communePolygons[commune.id] || [
     [commune.bounds[0][0], commune.bounds[0][1]],
@@ -120,11 +121,11 @@ function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
   const getPolygonStyle = () => {
     const baseStyle = {
       fillColor: commune.color,
-      color: isSelected ? '#ffffff' : commune.color,
-      weight: isSelected ? 3 : 2,
-      opacity: isSelected ? 0.9 : 0.7,
-      fillOpacity: isSelected ? 0.3 : 0.15,
-      dashArray: isSelected ? '0' : '5,5',
+      color: isActive ? '#ffffff' : (isSelected ? '#ffffff' : commune.color),
+      weight: isActive ? 4 : (isSelected ? 3 : 2),
+      opacity: isActive ? 1.0 : (isSelected ? 0.9 : 0.7),
+      fillOpacity: isActive ? 0.4 : (isSelected ? 0.3 : 0.15),
+      dashArray: isActive ? '0' : (isSelected ? '0' : '5,5'),
       lineCap: 'round',
       lineJoin: 'round'
     }
@@ -156,7 +157,7 @@ function CommunePolygon({ commune, isSelected, onClick, isMobile }) {
           }
         }
       }}
-      className={`commune-polygon commune-${commune.id} ${isSelected ? 'selected-commune' : ''}`}
+      className={`commune-polygon commune-${commune.id} ${isActive ? 'selected-commune' : ''} ${isSelected ? 'selected-commune' : ''}`}
     >
       <Tooltip 
         permanent={false} 
@@ -199,7 +200,7 @@ function CommuneLabel({ commune, isMobile }) {
 }
 
 const MapView = ({onZoneSelect}) => {
-  const { selectedZone, setSelectedZone, setZoneData, setPriorities, setIsLoading } = useStore()
+  const { selectedZone, setSelectedZone, setZoneData, setPriorities, setIsLoading, activeZone, setActiveZone } = useStore()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -214,10 +215,17 @@ const MapView = ({onZoneSelect}) => {
   }, [])
 
   const handleCommuneClick = async (communeName) => {
-    if (selectedZone === communeName) return
+    // Si la zone est déjà sélectionnée, charger ses données quand même
+    const isAlreadySelected = selectedZone && selectedZone.includes(communeName)
+    
+    if (!isAlreadySelected) {
+      // Ajouter la zone au tableau
+      setSelectedZone(communeName)
+    }
 
-    setSelectedZone(communeName)
+    // Charger les données de la zone (même si déjà sélectionnée)
     setIsLoading(true)
+    setActiveZone(communeName)
 
     try {
       const response = await getZoneData(communeName)
@@ -272,7 +280,8 @@ const MapView = ({onZoneSelect}) => {
             <CommunePolygon 
               key={commune.id}
               commune={commune}
-              isSelected={selectedZone === commune.name}
+              isSelected={selectedZone && selectedZone.includes(commune.name)}
+              isActive={activeZone === commune.name}
               onClick={handleCommuneClick}
               isMobile={isMobile}
             />
@@ -286,7 +295,7 @@ const MapView = ({onZoneSelect}) => {
             />
           ))}
           
-          <MapBoundsController selectedZone={selectedZone} isMobile={isMobile} />
+          <MapBoundsController selectedZone={selectedZone} activeZone={activeZone} isMobile={isMobile} />
           <ForceBounds />
         </MapContainer>
       </div>

@@ -12,6 +12,43 @@ const api = axios.create({
 // Simuler les réponses en attendant le backend
 const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
 
+// GET /general-status (État général pour toutes les zones)
+export const getGeneralStatus = async () => {
+  await simulateDelay(800)
+  
+  // Simulation de statistiques agrégées de toutes les zones
+  // TODO: Remplacer par l'appel API réel : GET ${API_BASE_URL}/general-status
+  const generalData = {
+    status: {
+      urgent: 22,    // Somme de toutes les zones : 3+1+2+4+5+6+1 = 22
+      pertinent: 35, // Somme : 5+3+4+6+8+7+2 = 35
+      ignored: 12,   // Somme : 2+1+1+2+3+2+1 = 12
+    },
+    summary: `📊 **État des lieux général — Port-au-Prince**\n\n🏛️ **7 communes surveillées**\n🔥 **22 incidents urgents** signalés\n📌 **35 incidents pertinents** en cours\n💤 **12 incidents ignorés**\n\n⚠️ **Zones nécessitant attention** : Cité Soleil (6 urgents), Port-au-Prince (5 urgents), Carrefour (4 urgents)\n\n📡 **Dernière mise à jour** : Il y a 2 minutes\n💬 Posez-moi des questions ou sélectionnez une zone pour plus de détails !`,
+    zones: [
+      { name: 'Cité Soleil', urgent: 6, pertinent: 7, ignored: 2 },
+      { name: 'Port-au-Prince', urgent: 5, pertinent: 8, ignored: 3 },
+      { name: 'Carrefour', urgent: 4, pertinent: 6, ignored: 2 },
+      { name: 'Delmas', urgent: 3, pertinent: 5, ignored: 2 },
+      { name: 'Croix-des-Bouquets', urgent: 2, pertinent: 4, ignored: 1 },
+      { name: 'Pétion-Ville', urgent: 1, pertinent: 3, ignored: 1 },
+      { name: 'Tabarre', urgent: 1, pertinent: 2, ignored: 1 },
+    ],
+    lastUpdate: new Date().toISOString(),
+  }
+  
+  // TODO: Remplacer par l'appel API réel quand le backend sera prêt
+  // try {
+  //   const response = await api.get('/general-status')
+  //   return { data: response.data }
+  // } catch (error) {
+  //   console.error('Error fetching general status:', error)
+  //   return { data: generalData } // Fallback sur données mockées
+  // }
+  
+  return { data: generalData }
+}
+
 // GET /zone/:name
 export const getZoneData = async (zoneName) => {
   await simulateDelay(800)
