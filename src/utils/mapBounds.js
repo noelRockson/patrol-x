@@ -10,7 +10,7 @@ export const haitiBounds = [
   // Zoom minimum et maximum
   export const minZoom = 9   // Vue générale d'Haïti - min zoom out for haiti
   export const maxZoom = 16  // Vue très détaillée
-  export const defaultZoom = 12
+  export const defaultZoom = 11
   
   // Limites pour Port-au-Prince et ses communes
   export const portAuPrinceBounds = [

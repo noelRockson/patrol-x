@@ -85,7 +85,13 @@ function ForceBounds() {
     
     // Vérifier périodiquement et sur les événements de déplacement
     map.on('moveend', checkBounds)
-    map.on('zoomend', checkBounds)
+    map.on('zoomend', () => {
+      checkBounds()
+      // Invalider la taille pour forcer le rechargement des tuiles
+      setTimeout(() => {
+        map.invalidateSize()
+      }, 100)
+    })
     
     const interval = setInterval(checkBounds, 1000) // Vérifier toutes les secondes
     
@@ -258,7 +264,8 @@ const MapView = ({onZoneSelect}) => {
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            bounds={haitiBounds} // Limiter le chargement des tuiles à Haïti
+            updateWhenZooming={true}
+            updateWhenIdle={true}
           />
           
           {portAuPrinceCommunes.map(commune => (
