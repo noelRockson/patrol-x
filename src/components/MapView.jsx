@@ -192,7 +192,7 @@ function CommuneLabel({ commune, isMobile }) {
   )
 }
 
-const MapView = () => {
+const MapView = ({onZoneSelect}) => {
   const { selectedZone, setSelectedZone, setZoneData, setPriorities, setIsLoading } = useStore()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -219,6 +219,12 @@ const MapView = () => {
 
       setZoneData(data)
       setPriorities(data.status)
+
+      // Ouvrir le chat automatiquement après sélection
+      if (onZoneSelect) {
+        onZoneSelect()
+      }
+
     } catch (error) {
       console.error('Error fetching zone data:', error)
     } finally {
@@ -227,10 +233,10 @@ const MapView = () => {
   }
 
   return (
-    <div className="h-full bg-gray-50 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 z-[1000] px-3 md:px-6 py-3 md:py-4 bg-white/90 backdrop-blur-sm border-b border-gray-200">
-        <h2 className="text-base md:text-lg font-semibold text-gray-900">Carte interactive</h2>
-        <p className="text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">Port-au-Prince, Haïti</p>
+    <div className="h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 z-[1000] px-3 md:px-6 py-3 md:py-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Carte interactive</h2>
+        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 md:mt-1">Port-au-Prince, Haïti</p>
       </div>
 
       <div className="h-full pt-16 md:pt-20 pb-2 md:pb-4 px-2 md:px-4">
@@ -279,12 +285,12 @@ const MapView = () => {
       </div>
 
       <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 z-[1000] pointer-events-none">
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 border border-gray-200 max-w-md mx-auto">
-          <p className="text-[10px] md:text-xs text-gray-600 text-center">
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
+          <p className="text-[10px] md:text-xs text-gray-600 dark:text-gray-300 text-center">
             {isMobile ? 'Touchez' : 'Cliquez sur'} une commune pour voir l'état des lieux
           </p>
-          <p className="text-[9px] md:text-[10px] text-gray-500 text-center mt-1">
-            Zone limitée à Haïti • Zoom: {minZoom}-{maxZoom}
+          <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 text-center mt-1">
+            Zone limitée à Haïti
           </p>
         </div>
       </div>

@@ -20,7 +20,9 @@ const ChatMessage = ({ message, isUser = false }) => {
     <div className={`mb-3 md:mb-4 ${isUser ? 'text-right' : 'text-left'}`}>
       <div
         className={`inline-block max-w-[90%] md:max-w-[85%] px-3 md:px-4 py-2 md:py-3 rounded-lg ${
-          isUser ? 'bg-blue-100 text-blue-900' : 'bg-gray-100 text-gray-900'
+          isUser 
+            ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
         }`}
       >
         <div className="whitespace-pre-wrap text-xs md:text-sm leading-relaxed">
