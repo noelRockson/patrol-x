@@ -9,7 +9,7 @@ const Layout = () => {
   const [isPrioritiesOpen, setIsPrioritiesOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   
-  // Initialiser le mode dark depuis localStorage ou préférence système
+  // Initialiser le mode dark depuis localStorage, sinon light par défaut
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === 'undefined') return false
     
@@ -26,14 +26,9 @@ const Layout = () => {
       return isDark
     }
     
-    // Sinon, utiliser la préférence système
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    if (prefersDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-    return prefersDark
+    // Par défaut: mode light (false)
+    document.documentElement.classList.remove('dark')
+    return false
   })
 
   // Appliquer le thème quand il change
