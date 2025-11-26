@@ -289,7 +289,7 @@ const SidebarPriority = ({ isMobile = false }) => {
                                 </div>
                               </div>
                               <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">
-                                {event.messages_used}
+                                {event.summary}
                               </p>
                               {event.recommended_action && (
                                 <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">

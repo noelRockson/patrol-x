@@ -100,35 +100,29 @@ const transformApiDataToGeneralStatus = (events) => {
     summary,
     zones,
     lastUpdate: new Date().toISOString(),
-    rawEvents: events, // Garder les événements bruts pour référence
+    rawEvents: events, 
   }
 }
 
-// GET /general-status (État général pour toutes les zones)
+// GET /events/latest (État général pour toutes les zones)
 export const getGeneralStatus = async () => {
   await simulateDelay(800)
   
-  // Essayer d'appeler l'API réelle si l'URL est configurée
   if (API_CTR_CENTER_URL) {
     try {
       const response = await apiCtrCenterApi.get('/events/latest')
       // console.log('data from apiCtrCenterApi :', response.data)
       
-      // Extraire les événements de la réponse
-      const events = response.data?.Events || response.data?.events || response.data || []
-      
-      // Transformer les données au format attendu
+      const events = response.data?.Events || response.data?.events || response.data || []      
       const transformedData = transformApiDataToGeneralStatus(events)
-      
       return { data: transformedData }
+
     } catch (error) {
-      // Gérer les erreurs CORS et autres erreurs réseau
       if (error.code === 'ERR_NETWORK' || error.message?.includes('CORS')) {
         console.warn('Erreur CORS ou réseau - utilisation des données mockées')
       } else {
         console.error('Error fetching general status:', error)
       }
-      // Fallback sur données mockées en cas d'erreur
       return { data: generalDataFallback }
     }
   }
