@@ -1,6 +1,7 @@
+// import { data } from 'autoprefixer'
 import axios from 'axios'
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const API_CTR_CENTER_URL = import.meta.env.VITE_API_CTR_CENTER_URL
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,44 +10,131 @@ const api = axios.create({
   },
 })
 
+const apiCtrCenterApi = axios.create({
+  baseURL: API_CTR_CENTER_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    accept: 'application/json',
+  },
+})
 // Simuler les réponses en attendant le backend
 const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Données mockées de fallback
+const generalDataFallback = {
+  status: {
+    urgent: 0,
+    pertinent: 0,
+    ignored: 0,
+  },
+  summary: `📊 **État des lieux général — Port-au-Prince**\n\n🏛️ **Aucune information disponible pour le moment**\n\n📡 **Dernière mise à jour** : ${new Date().toLocaleString('fr-FR')}\n💬 Posez-moi des questions ou sélectionnez une zone pour plus de détails !`,
+  zones: [],
+  lastUpdate: new Date().toISOString(),
+}
+
+// Fonction pour transformer les données de l'API au format attendu
+const transformApiDataToGeneralStatus = (events) => {
+  if (!events || !Array.isArray(events) || events.length === 0) {
+    return generalDataFallback
+  }
+
+  // Compter les événements par priorité
+  let urgent = 0
+  let pertinent = 0
+  let ignored = 0
+
+  // Grouper par zone
+  const zonesMap = new Map()
+
+  events.forEach((event) => {
+    // Déterminer la catégorie selon la priorité
+    if (event.priority === 'urgent') {
+      urgent++
+    } else if (event.priority === 'high' || event.priority === 'medium') {
+      pertinent++
+    } else if (event.priority === 'low') {
+      ignored++
+    }
+
+    // Grouper par zone (location)
+    const zoneName = event.location || 'Général'
+    
+    if (!zonesMap.has(zoneName)) {
+      zonesMap.set(zoneName, {
+        name: zoneName,
+        urgent: 0,
+        pertinent: 0,
+        ignored: 0,
+      })
+    }
+
+    const zone = zonesMap.get(zoneName)
+    if (event.priority === 'urgent') {
+      zone.urgent++
+    } else if (event.priority === 'high' || event.priority === 'medium') {
+      zone.pertinent++
+    } else if (event.priority === 'low') {
+      zone.ignored++
+    }
+  })
+
+  // Convertir la Map en tableau et trier par nombre total d'incidents
+  const zones = Array.from(zonesMap.values())
+    .sort((a, b) => (b.urgent + b.pertinent) - (a.urgent + a.pertinent))
+
+  // Créer un résumé
+  const urgentZones = zones
+    .filter(z => z.urgent > 0)
+    .slice(0, 3)
+    .map(z => `${z.name} (${z.urgent} urgent${z.urgent > 1 ? 's' : ''})`)
+    .join(', ')
+
+  const summary = `📊 **État des lieux général — Port-au-Prince**\n\n🏛️ **${zones.length} zone${zones.length > 1 ? 's' : ''} surveillée${zones.length > 1 ? 's' : ''}**\n🔥 **${urgent} incident${urgent > 1 ? 's' : ''} urgent${urgent > 1 ? 's' : ''}** signalé${urgent > 1 ? 's' : ''}\n📌 **${pertinent} incident${pertinent > 1 ? 's' : ''} pertinent${pertinent > 1 ? 's' : ''}** en cours\n💤 **${ignored} incident${ignored > 1 ? 's' : ''} ignoré${ignored > 1 ? 's' : ''}**\n\n${urgentZones ? `⚠️ **Zones nécessitant attention** : ${urgentZones}\n\n` : ''}📡 **Dernière mise à jour** : ${new Date().toLocaleString('fr-FR')}\n💬 Posez-moi des questions ou sélectionnez une zone pour plus de détails !`
+
+  return {
+    status: {
+      urgent,
+      pertinent,
+      ignored,
+    },
+    summary,
+    zones,
+    lastUpdate: new Date().toISOString(),
+    rawEvents: events, // Garder les événements bruts pour référence
+  }
+}
 
 // GET /general-status (État général pour toutes les zones)
 export const getGeneralStatus = async () => {
   await simulateDelay(800)
   
-  // Simulation de statistiques agrégées de toutes les zones
-  // TODO: Remplacer par l'appel API réel : GET ${API_BASE_URL}/general-status
-  const generalData = {
-    status: {
-      urgent: 22,    // Somme de toutes les zones : 3+1+2+4+5+6+1 = 22
-      pertinent: 35, // Somme : 5+3+4+6+8+7+2 = 35
-      ignored: 12,   // Somme : 2+1+1+2+3+2+1 = 12
-    },
-    summary: `📊 **État des lieux général — Port-au-Prince**\n\n🏛️ **7 communes surveillées**\n🔥 **22 incidents urgents** signalés\n📌 **35 incidents pertinents** en cours\n💤 **12 incidents ignorés**\n\n⚠️ **Zones nécessitant attention** : Cité Soleil (6 urgents), Port-au-Prince (5 urgents), Carrefour (4 urgents)\n\n📡 **Dernière mise à jour** : Il y a 2 minutes\n💬 Posez-moi des questions ou sélectionnez une zone pour plus de détails !`,
-    zones: [
-      { name: 'Cité Soleil', urgent: 6, pertinent: 7, ignored: 2 },
-      { name: 'Port-au-Prince', urgent: 5, pertinent: 8, ignored: 3 },
-      { name: 'Carrefour', urgent: 4, pertinent: 6, ignored: 2 },
-      { name: 'Delmas', urgent: 3, pertinent: 5, ignored: 2 },
-      { name: 'Croix-des-Bouquets', urgent: 2, pertinent: 4, ignored: 1 },
-      { name: 'Pétion-Ville', urgent: 1, pertinent: 3, ignored: 1 },
-      { name: 'Tabarre', urgent: 1, pertinent: 2, ignored: 1 },
-    ],
-    lastUpdate: new Date().toISOString(),
+  // Essayer d'appeler l'API réelle si l'URL est configurée
+  if (API_CTR_CENTER_URL) {
+    try {
+      const response = await apiCtrCenterApi.get('/events/latest')
+      // console.log('data from apiCtrCenterApi :', response.data)
+      
+      // Extraire les événements de la réponse
+      const events = response.data?.Events || response.data?.events || response.data || []
+      
+      // Transformer les données au format attendu
+      const transformedData = transformApiDataToGeneralStatus(events)
+      
+      return { data: transformedData }
+    } catch (error) {
+      // Gérer les erreurs CORS et autres erreurs réseau
+      if (error.code === 'ERR_NETWORK' || error.message?.includes('CORS')) {
+        console.warn('Erreur CORS ou réseau - utilisation des données mockées')
+      } else {
+        console.error('Error fetching general status:', error)
+      }
+      // Fallback sur données mockées en cas d'erreur
+      return { data: generalDataFallback }
+    }
   }
   
-  // TODO: Remplacer par l'appel API réel quand le backend sera prêt
-  // try {
-  //   const response = await api.get('/general-status')
-  //   return { data: response.data }
-  // } catch (error) {
-  //   console.error('Error fetching general status:', error)
-  //   return { data: generalData } // Fallback sur données mockées
-  // }
-  
-  return { data: generalData }
+  // Si pas d'URL configurée, utiliser les données mockées
+  return { data: generalDataFallback }
 }
 
 // GET /zone/:name

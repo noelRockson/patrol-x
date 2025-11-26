@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useStore } from '../context/store'
 import { getZoneData, getGeneralStatus } from '../api/api'
 
@@ -6,6 +6,8 @@ const SidebarPriority = ({ isMobile = false }) => {
   const { selectedZone, priorities, removeSelectedZone, clearSelectedZones, activeZone, setActiveZone, setZoneData, setPriorities, setIsLoading, generalStatus, setGeneralStatus, zoneData } = useStore()
   // isDisabled est true si le tableau est vide
   const isDisabled = !selectedZone || selectedZone.length === 0
+  // État pour gérer la catégorie sélectionnée pour voir les détails
+  const [selectedCategory, setSelectedCategory] = useState(null)
 
   // Charger l'état général au démarrage et quand aucune zone n'est sélectionnée
   useEffect(() => {
@@ -20,14 +22,17 @@ const SidebarPriority = ({ isMobile = false }) => {
           // Ne pas mettre à jour zoneData avec l'état général pour que le chat ne l'affiche pas
         } catch (error) {
           console.error('Error fetching general status:', error)
+          // En cas d'erreur, getGeneralStatus retourne quand même les données fallback
+          // Donc on devrait avoir les données même en cas d'erreur
         } finally {
           setIsLoading(false)
         }
       }
       loadGeneralStatus()
     } else {
-      // Réinitialiser l'état général quand une zone est sélectionnée
+      // Réinitialiser l'état général et la catégorie sélectionnée quand une zone est sélectionnée
       setGeneralStatus(null)
+      setSelectedCategory(null)
     }
   }, [isDisabled, setGeneralStatus, setPriorities, setIsLoading])
 
@@ -84,6 +89,7 @@ const SidebarPriority = ({ isMobile = false }) => {
       color: 'text-red-600',
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
+      priority: 'urgent',
     },
     {
       emoji: '📌',
@@ -92,6 +98,7 @@ const SidebarPriority = ({ isMobile = false }) => {
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
+      priority: 'pertinent', // high ou medium
     },
     {
       emoji: '💤',
@@ -100,8 +107,27 @@ const SidebarPriority = ({ isMobile = false }) => {
       color: 'text-gray-600',
       bgColor: 'bg-gray-50',
       borderColor: 'border-gray-200',
+      priority: 'ignored', // low
     },
   ]
+
+  // Filtrer les événements selon la catégorie sélectionnée
+  const getFilteredEvents = (category) => {
+    if (!generalStatus?.rawEvents || !Array.isArray(generalStatus.rawEvents)) {
+      return []
+    }
+
+    return generalStatus.rawEvents.filter((event) => {
+      if (category.priority === 'urgent') {
+        return event.priority === 'urgent'
+      } else if (category.priority === 'pertinent') {
+        return event.priority === 'high' || event.priority === 'medium'
+      } else if (category.priority === 'ignored') {
+        return event.priority === 'low'
+      }
+      return false
+    })
+  }
 
   return (
     <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
@@ -177,31 +203,125 @@ const SidebarPriority = ({ isMobile = false }) => {
             
             {/* Statistiques générales */}
             <div className="space-y-3 md:space-y-4">
-              {categories.map((category, index) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-xl border-2 transition-all bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="text-2xl">{category.emoji}</div>
-                      <div>
-                        <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
-                          {category.label}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {category.count === 0 && 'Aucun incident'}
-                          {category.count === 1 && '1 incident au total'}
-                          {category.count > 1 && `${category.count} incidents au total`}
+              {categories.map((category, index) => {
+                const filteredEvents = getFilteredEvents(category)
+                const isSelected = selectedCategory === category.priority
+                return (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      if (category.count > 0) {
+                        setSelectedCategory(isSelected ? null : category.priority)
+                      }
+                    }}
+                    className={`p-4 rounded-xl border-2 transition-all bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 ${
+                      category.count > 0 ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'
+                    } ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">{category.emoji}</div>
+                        <div>
+                          <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
+                            {category.label}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {category.count === 0 && 'Aucun incident'}
+                            {category.count === 1 && '1 incident au total'}
+                            {category.count > 1 && `${category.count} incidents au total`}
+                          </div>
                         </div>
                       </div>
+                      <div className={`text-2xl md:text-3xl font-bold ${category.color}`}>
+                        {category.count}
+                      </div>
                     </div>
-                    <div className={`text-2xl md:text-3xl font-bold ${category.color}`}>
-                      {category.count}
-                    </div>
+                    
+                    {/* Afficher les détails si la catégorie est sélectionnée */}
+                    {isSelected && filteredEvents.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            Détails des incidents ({filteredEvents.length})
+                          </h4>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedCategory(null)
+                            }}
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                          >
+                            Fermer
+                          </button>
+                        </div>
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                          {filteredEvents.map((event, eventIndex) => (
+                            <div
+                              key={eventIndex}
+                              className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-shadow"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <div className="font-semibold text-xs text-gray-900 dark:text-white mb-1">
+                                    📍 {event.location || 'Général'}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1.5 mb-2">
+                                    {event.event_type && (
+                                      <span className="inline-block px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-xs">
+                                        {event.event_type}
+                                      </span>
+                                    )}
+                                    {event.severity && (
+                                      <span className={`inline-block px-2 py-0.5 rounded text-xs ${
+                                        event.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                                        event.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                        'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                      }`}>
+                                        {event.severity}
+                                      </span>
+                                    )}
+                                    {event.probability && (
+                                      <span className="inline-block px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs">
+                                        {Math.round(event.probability * 100)}% probabilité
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">
+                                {event.messages_used}
+                              </p>
+                              {event.recommended_action && (
+                                <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                  💡 <strong>Action recommandée :</strong> {event.recommended_action}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-3 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                {event.timestamp_start && (
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    📅 {new Date(event.timestamp_start).toLocaleString('fr-FR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                )}
+                                {event.sources_count && (
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    📡 {event.sources_count} source{event.sources_count > 1 ? 's' : ''}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Liste des zones avec statistiques */}
@@ -259,35 +379,39 @@ const SidebarPriority = ({ isMobile = false }) => {
           </>
         ) : (
           <div className="space-y-3 md:space-y-4">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  isDisabled
-                    ? 'opacity-50 cursor-not-allowed'
-                    : `${category.bgColor} dark:bg-gray-700/50 ${category.borderColor} dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 cursor-pointer active:scale-[0.98]`
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">{category.emoji}</div>
-                    <div>
-                      <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
-                        {category.label}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {category.count === 0 && 'Aucun incident'}
-                        {category.count === 1 && '1 incident'}
-                        {category.count > 1 && `${category.count} incidents`}
+            {categories.map((category, index) => {
+              // Pour les zones sélectionnées, on peut aussi afficher les détails si on a les rawEvents
+              // Pour l'instant, on garde juste le style cliquable
+              return (
+                <div
+                  key={index}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    isDisabled
+                      ? 'opacity-50 cursor-not-allowed'
+                      : `${category.bgColor} dark:bg-gray-700/50 ${category.borderColor} dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 cursor-pointer active:scale-[0.98]`
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl">{category.emoji}</div>
+                      <div>
+                        <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
+                          {category.label}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {category.count === 0 && 'Aucun incident'}
+                          {category.count === 1 && '1 incident'}
+                          {category.count > 1 && `${category.count} incidents`}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className={`text-2xl md:text-3xl font-bold ${category.color}`}>
-                    {category.count}
+                    <div className={`text-2xl md:text-3xl font-bold ${category.color}`}>
+                      {category.count}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

@@ -1,7 +1,4 @@
-// ==========================================
-// Layout.jsx - COMPOSANT LAYOUT PRINCIPAL COMPLET
-// Tout le code nécessaire est inclus dans ce fichier
-// ==========================================
+
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import Logo from './Logo'
 
@@ -10,10 +7,6 @@ const SidebarPriority = lazy(() => import('./SidebarPriority'))
 const MapView = lazy(() => import('./MapView'))
 const Chat = lazy(() => import('./Chat'))
 
-// ==========================================
-// CLASSE: SafeStorage
-// Gestion sécurisée du localStorage avec try/catch
-// ==========================================
 class SafeStorage {
   static get(key, defaultValue = null) {
     try {
@@ -46,10 +39,7 @@ class SafeStorage {
   }
 }
 
-// ==========================================
-// COMPOSANT: LoadingSpinner
-// Indicateur de chargement réutilisable
-// ==========================================
+
 const LoadingSpinner = ({ size = 'md', message = 'Chargement...' }) => {
   const sizes = {
     sm: 'w-4 h-4',
@@ -67,10 +57,6 @@ const LoadingSpinner = ({ size = 'md', message = 'Chargement...' }) => {
   )
 }
 
-// ==========================================
-// CLASSE: ErrorBoundary
-// Capture les erreurs React et affiche un écran de secours
-// ==========================================
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props)
@@ -112,10 +98,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// ==========================================
-// HOOK: useOnlineStatus
-// Détecte si l'utilisateur est en ligne ou hors ligne
-// ==========================================
 function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
@@ -135,10 +117,6 @@ function useOnlineStatus() {
   return isOnline
 }
 
-// ==========================================
-// COMPOSANT: OfflineNotice
-// Bannière d'avertissement affichée quand l'utilisateur est hors ligne
-// ==========================================
 const OfflineNotice = () => {
   const isOnline = useOnlineStatus()
 
@@ -160,10 +138,6 @@ const OfflineNotice = () => {
   )
 }
 
-// ==========================================
-// COMPOSANT PRINCIPAL: Layout
-// Structure principale de l'application
-// ==========================================
 const Layout = () => {
   // États locaux
   const [isChatOpen, setIsChatOpen] = useState(false)

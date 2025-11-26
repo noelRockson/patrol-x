@@ -1,6 +1,3 @@
-// ==========================================
-// Chat.jsx - COMPOSANT CHAT AMÉLIORÉ
-// ==========================================
 import React, { useState, useEffect, useRef } from 'react'
 import { useStore } from '../context/store'
 import { askQuestion } from '../api/api'

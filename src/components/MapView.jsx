@@ -315,10 +315,7 @@
 // }
 
 // export default MapView
-// ==========================================
-// MapView.jsx - COMPOSANT CARTE INTERACTIVE
-// Version finale avec toutes les optimisations
-// ==========================================
+
 import React, { useEffect, useState, memo, useCallback, useRef } from 'react'
 import { MapContainer, TileLayer, Polygon, Tooltip, Marker, useMap } from 'react-leaflet'
 import { useStore } from '../context/store'
@@ -335,10 +332,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
-// ==========================================
-// HOOK: useDebounce
-// Retarde l'exécution d'une fonction
-// ==========================================
 function useDebounce(callback, delay) {
   const timeoutRef = useRef(null)
 
@@ -363,10 +356,6 @@ function useDebounce(callback, delay) {
   )
 }
 
-// ==========================================
-// COMPOSANT: MapBoundsController
-// Contrôle les limites et le zoom
-// ==========================================
 function MapBoundsController({ selectedZone, activeZone, isMobile }) {
   const map = useMap()
   
@@ -406,10 +395,6 @@ function MapBoundsController({ selectedZone, activeZone, isMobile }) {
   return null
 }
 
-// ==========================================
-// COMPOSANT: ForceBounds
-// Force le rebond aux limites
-// ==========================================
 function ForceBounds() {
   const map = useMap()
   
@@ -452,10 +437,6 @@ function ForceBounds() {
   return null
 }
 
-// ==========================================
-// COMPOSANT: CommunePolygon (OPTIMISÉ)
-// Affiche un polygone de commune
-// ==========================================
 const CommunePolygon = memo(({ commune, isSelected, isActive, onClick, isMobile }) => {
   // Positions du polygone
   const positions = commune.polygon || communePolygons[commune.id] || [
@@ -541,10 +522,6 @@ const CommunePolygon = memo(({ commune, isSelected, isActive, onClick, isMobile 
 
 CommunePolygon.displayName = 'CommunePolygon'
 
-// ==========================================
-// COMPOSANT: CommuneLabel (OPTIMISÉ)
-// Affiche le nom de la commune
-// ==========================================
 const CommuneLabel = memo(({ commune, isMobile }) => {
   const customIcon = new L.DivIcon({
     html: `
@@ -573,9 +550,6 @@ const CommuneLabel = memo(({ commune, isMobile }) => {
 
 CommuneLabel.displayName = 'CommuneLabel'
 
-// ==========================================
-// COMPOSANT PRINCIPAL: MapView
-// ==========================================
 const MapView = ({ onZoneSelect }) => {
   const { 
     selectedZone, 
