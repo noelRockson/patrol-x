@@ -29,6 +29,12 @@ const SidebarPriority = ({ isMobile = false }) => {
         }
       }
       loadGeneralStatus()
+      const interval = setInterval(() => {
+        loadGeneralStatus()
+        console.log('loadGeneralStatus updated')
+      }, 5000)
+      return () => clearInterval(interval)
+
     } else {
       // Réinitialiser l'état général et la catégorie sélectionnée quand une zone est sélectionnée
       setGeneralStatus(null)

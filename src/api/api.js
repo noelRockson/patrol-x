@@ -1,20 +1,11 @@
-// import { data } from 'autoprefixer'
 import axios from 'axios'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-const API_CTR_CENTER_URL = import.meta.env.VITE_API_CTR_CENTER_URL
+const CTR_CENTER_ENDPOINT = import.meta.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-  },
-})
-
-const apiCtrCenterApi = axios.create({
-  baseURL: API_CTR_CENTER_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    accept: 'application/json',
   },
 })
 // Simuler les réponses en attendant le backend
@@ -107,28 +98,24 @@ const transformApiDataToGeneralStatus = (events) => {
 // GET /events/latest (État général pour toutes les zones)
 export const getGeneralStatus = async () => {
   await simulateDelay(800)
-  
-  if (API_CTR_CENTER_URL) {
-    try {
-      const response = await apiCtrCenterApi.get('/events/latest')
-      // console.log('data from apiCtrCenterApi :', response.data)
-      
-      const events = response.data?.Events || response.data?.events || response.data || []      
-      const transformedData = transformApiDataToGeneralStatus(events)
-      return { data: transformedData }
 
-    } catch (error) {
-      if (error.code === 'ERR_NETWORK' || error.message?.includes('CORS')) {
-        console.warn('Erreur CORS ou réseau - utilisation des données mockées')
-      } else {
-        console.error('Error fetching general status:', error)
-      }
-      return { data: generalDataFallback }
+  try {
+    // On passe maintenant par notre backend (API_BASE_URL) qui proxy les requêtes
+    // const response = await api.get(CTR_CENTER_ENDPOINT)
+    const response = await api.get('/events/latest')
+
+    const events = response.data?.Events || response.data?.events || response.data || []
+    const transformedData = transformApiDataToGeneralStatus(events)
+    return { data: transformedData }
+  } catch (error) {
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('CORS')) {
+      console.warn('Erreur CORS ou réseau - utilisation des données mockées')
+    } else {
+      console.error('Error fetching general status:', error)
     }
+    // En cas d’erreur réseau / backend, on revient sur les données mockées
+    return { data: generalDataFallback }
   }
-  
-  // Si pas d'URL configurée, utiliser les données mockées
-  return { data: generalDataFallback }
 }
 
 // GET /zone/:name
