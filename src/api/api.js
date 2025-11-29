@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_BASE_URL = import.meta.env.VITE_API_URL + 'api' || 'http://localhost:3000/api'
+const API_BASE_URL = VITE_API_CTR_CENTER_URL || 'http://localhost:3000/api'
 const CTR_CENTER_ENDPOINT = import.meta.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 
 const api = axios.create({
@@ -189,10 +189,18 @@ export const getZoneData = async (zoneName) => {
     },
   }
 
-  if (mockData[zoneName]) {
+  // if (mockData[zoneName]) {
+  //   return { data: mockData[zoneName] }
+  // }
+
+  try {
+    const response = await api.get(`/zone/${zoneName}`)
+    console.log('endpoint: ',zoneName)
+    return { data: response.data }
+  } catch (error) {
+    console.error('Error fetching zone data:', error)
     return { data: mockData[zoneName] }
   }
-
   // Fallback pour autres zones
   return {
     data: {

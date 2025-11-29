@@ -257,7 +257,7 @@ const Layout = () => {
           {!isMobile && (
             <div className="w-1/3 lg:w-1/4 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
-                <SidebarPriority />
+                <SidebarPriority onZoneSelect={() => setIsChatOpen(true)} />
               </Suspense>
             </div>
           )}
@@ -301,7 +301,7 @@ const Layout = () => {
                 {/* Contenu scrollable du drawer */}
                 <div className="overflow-y-auto" style={{ height: 'calc(100% - 73px)' }}>
                   <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
-                    <SidebarPriority isMobile={true} />
+                    <SidebarPriority isMobile={true} onZoneSelect={() => setIsChatOpen(true)} />
                   </Suspense>
                 </div>
               </div>

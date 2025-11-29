@@ -1,6 +1,7 @@
 import React from 'react'
 
 export const parseMarkdown = (text) => {
+  let keyCounter = 0
   const rules = [
     { 
       pattern: /\*\*(.+?)\*\*/g, 
@@ -48,9 +49,10 @@ export const parseMarkdown = (text) => {
             content: part.content.slice(lastIndex, match.index) 
           })
         }
+        const globalKey = keyCounter++
         newParts.push({ 
           type: 'component', 
-          content: <Component match={match} i={i} key={i} /> 
+          content: <Component match={match} i={globalKey} key={globalKey} /> 
         })
         lastIndex = match.index + match[0].length
       })

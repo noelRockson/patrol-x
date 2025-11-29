@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useStore } from '../context/store'
 import { getZoneData, getGeneralStatus } from '../api/api'
 
-const SidebarPriority = ({ isMobile = false }) => {
+const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
   const { selectedZone, priorities, removeSelectedZone, clearSelectedZones, activeZone, setActiveZone, setZoneData, setPriorities, setIsLoading, generalStatus, setGeneralStatus, zoneData } = useStore()
   // isDisabled est true si le tableau est vide
   const isDisabled = !selectedZone || selectedZone.length === 0
@@ -44,33 +44,38 @@ const SidebarPriority = ({ isMobile = false }) => {
 
   // Charger automatiquement les données quand activeZone change (après suppression d'une zone)
   useEffect(() => {
-    // Si activeZone existe et qu'on a des zones sélectionnées, charger les données
-    // Ne charger que si les données actuelles ne correspondent pas à la zone active
+    // Si activeZone existe et qu'on a des zones sélectionnées, charger les données UNE FOIS
     if (activeZone && selectedZone && selectedZone.length > 0 && selectedZone.includes(activeZone)) {
-      // Vérifier si les données actuelles correspondent à la zone active
-      const currentZoneName = zoneData?.zone
-      if (currentZoneName !== activeZone) {
-        const loadZoneData = async () => {
-          setIsLoading(true)
-          try {
-            const response = await getZoneData(activeZone)
-            const data = response.data
-            
-            setZoneData(data)
-            setPriorities(data.status)
-          } catch (error) {
-            console.error('Error fetching zone data:', error)
-          } finally {
-            setIsLoading(false)
-          }
-        }
-        loadZoneData()
+      // Ouvrir le chat si disponible
+      if (onZoneSelect) {
+        onZoneSelect()
       }
+      
+      const loadZoneData = async () => {
+        setIsLoading(true)
+        try {
+          const response = await getZoneData(activeZone)
+          const data = response.data
+          
+          setZoneData(data)
+          setPriorities(data.status)
+        } catch (error) {
+          console.error('Error fetching zone data:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+      loadZoneData()
     }
-  }, [activeZone, selectedZone, zoneData, setZoneData, setPriorities, setIsLoading])
+  }, [activeZone, selectedZone, setZoneData, setPriorities, setIsLoading, onZoneSelect])
 
   // Fonction pour charger les données d'une zone spécifique
   const handleLoadZoneData = async (zoneName) => {
+    // Ouvrir le chat IMMÉDIATEMENT avant de charger les données
+    if (onZoneSelect) {
+      onZoneSelect()
+    }
+    
     setIsLoading(true)
     setActiveZone(zoneName)
     
