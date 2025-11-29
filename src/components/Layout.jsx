@@ -392,6 +392,7 @@ const Layout = () => {
                 }
               `}
               style={isMobile ? { height: '90vh', maxHeight: '90vh' } : {}}
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Poignée de glissement pour mobile (swipe indicator) */}
               {isMobile && (

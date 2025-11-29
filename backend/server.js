@@ -6,7 +6,8 @@ dotenv.config()
 
 let x = 0
 const PORT = process.env.PORT || 3000
-const API_CTR_CENTER_URL = process.env.VITE_API_CTR_CENTER_URL
+// Utiliser l'URL de l'API principale pour l'authentification
+const API_CTR_CENTER_URL = process.env.VITE_API_CTR_CENTER_URL || 'https://px-rho.vercel.app'
 const API_CTR_CENTER_URL_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 const API_CTR_CENTER_URL_LOCATION_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_LOCATION_ENDPOINT
 const API_CTR_CENTER_URL_CHAT_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_CHAT_ENDPOINT || '/chat'
@@ -228,6 +229,127 @@ app.post('/api/ask', async (req, res) => {
       error: 'Failed to get response from chat API',
       details: errorMessage,
     })
+  }
+})
+
+// POST /api/login - Login user and save the token in the session
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body
+  
+  // Vérification des champs obligatoires
+  if (!username || !password) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'Username and password are required' 
+    })
+  }
+
+  const url = API_CTR_CENTER_URL + '/auth/signin'
+  
+  try {
+    const response = await axios.post(url, {
+      username: username,
+      password: password,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+      },
+    })
+
+    console.log('[backend] Login successful for user:', username)
+    res.json({ 
+      status: 'ok', 
+      message: 'Login successful', 
+      token: response.data.token 
+    })
+
+  } catch (error) {
+    console.error('[backend] Login error:', error.message)
+    
+    // Gestion des erreurs spécifiques
+    if (error.response) {
+      // La requête a été faite et le serveur a répondu avec un code d'erreur
+      return res.status(error.response.status).json({
+        status: 'error',
+        message: error.response.data?.message || 'Authentication failed',
+        details: error.response.data
+      })
+    } else if (error.request) {
+      // La requête a été faite mais aucune réponse n'a été reçue
+      return res.status(503).json({
+        status: 'error',
+        message: 'Authentication service unavailable',
+        details: 'Could not connect to authentication server'
+      })
+    } else {
+      // Une erreur s'est produite lors de la configuration de la requête
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+        details: error.message
+      })
+    }
+  }
+})
+
+// Post /api/signup - Sign up user and save the token in the session
+app.post('/api/signup', async (req, res) => {
+  const { username, email, password } = req.body
+  const url = API_CTR_CENTER_URL + '/auth/signup'
+
+  const userData = {
+    username: username,
+    email: email,
+    password: password,
+  }
+
+  const userJsonString = JSON.stringify(userData)
+
+  console.log('Auth URL:', url)
+  console.log('Attempting to create user:', { username, email ,password})
+  
+  try {
+    const response = await axios.post(url, userJsonString, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+
+    console.log('[backend] Signup successful for user:', username)
+    res.json({ 
+      status: 'ok',     
+      message: 'Signup successful', 
+      token: response.data.token 
+    })
+
+  } catch (error) {
+    console.error('[backend] Signup error:', error.message)
+    
+    // Gestion des erreurs spécifiques
+    if (error.response) {
+      // La requête a été faite et le serveur a répondu avec un code d'erreur
+      return res.status(error.response.status).json({
+        status: 'error',
+        message: error.response.data?.message || 'Authentication failed',
+        details: error.response.data
+      })
+    } else if (error.request) {
+      // La requête a été faite mais aucune réponse n'a été reçue
+      return res.status(503).json({
+        status: 'error',
+        message: 'Authentication service unavailable',
+        details: 'Could not connect to authentication server'
+      })
+    } else {
+      // Une erreur s'est produite lors de la configuration de la requête
+      return res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+        details: error.message
+      })
+    }
   }
 })
 

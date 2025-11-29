@@ -24,6 +24,166 @@ const generalDataFallback = {
   lastUpdate: new Date().toISOString(),
 }
 
+// Fonction pour login user
+export const loginUser = async (username, password) => {
+  try {
+    const response = await api.post('/login', { username, password })
+    // Save the token in the session
+    if (response.data.token) {
+      sessionStorage.setItem('token', response.data.token)
+      console.log('token saved in session: ', response.data.token)
+    }
+    return {
+      status: 'ok',
+      data: response.data
+    }
+  } catch (error) {
+    console.error('Error logging in user:', error)
+    
+    // Gérer les différents types d'erreurs
+    if (error.response) {
+      // Le serveur a répondu avec un code d'erreur
+      const status = error.response.status
+      const message = error.response.data?.message || error.response.data?.error || 'Erreur de connexion'
+      
+      if (status === 401) {
+        return {
+          status: 'error',
+          message: 'Email ou mot de passe incorrect'
+        }
+      } else if (status === 404) {
+        return {
+          status: 'error',
+          message: 'Utilisateur non trouvé'
+        }
+      } else {
+        return {
+          status: 'error',
+          message: message || 'Erreur lors de la connexion'
+        }
+      }
+    } else if (error.request) {
+      // La requête a été faite mais aucune réponse n'a été reçue
+      return {
+        status: 'error',
+        message: 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
+      }
+    } else {
+      // Une erreur s'est produite lors de la configuration de la requête
+      return {
+        status: 'error',
+        message: 'Erreur lors de la connexion. Veuillez réessayer.'
+      }
+    }
+  }
+}
+
+// Fonction Signup user using name, email and password
+export const signupUser = async (username, email, password) => {
+  // Validation des champs obligatoires
+  if (!username || !email || !password) {
+    return {
+      status: 'error',
+      message: 'Tous les champs sont obligatoires',
+      code: 'MISSING_FIELDS'
+    }
+  }
+
+  // Validation basique de l'email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return {
+      status: 'error',
+      message: 'Veuillez fournir une adresse email valide',
+      code: 'INVALID_EMAIL'
+    }
+  }
+
+  // Validation du mot de passe (au moins 6 caractères)
+  if (password.length < 6) {
+    return {
+      status: 'error',
+      message: 'Le mot de passe doit contenir au moins 6 caractères',
+      code: 'WEAK_PASSWORD'
+    }
+  }
+
+  try {
+    console.log('Sending signup request with:', { username: username.trim(), email: email.trim().toLowerCase() })
+    const response = await api.post('/signup', { 
+      username: username.trim(),
+      email: email.trim().toLowerCase(),
+      password: password
+    })
+
+    // Vérification de la réponse
+    if (response.data && response.data.token) {
+      // Sauvegarde du token dans le sessionStorage
+      sessionStorage.setItem('token', response.data.token)
+      
+      // Journalisation (en mode développement uniquement)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[API] Inscription réussie pour:', email)
+      }
+
+      return {
+        status: 'ok',
+        message: 'Inscription réussie !',
+        data: {
+          token: response.data.token,
+          user: response.data.user || { username, email } // Inclure les données utilisateur si disponibles
+        }
+      }
+    }
+
+    // Si on arrive ici, il y a un problème avec la réponse
+    return {
+      status: 'error',
+      message: 'Réponse inattendue du serveur',
+      code: 'INVALID_RESPONSE'
+    }
+
+  } catch (error) {
+    console.error('[API] Erreur lors de l\'inscription:', error)
+    
+    // Gestion des erreurs spécifiques
+    if (error.response) {
+      // Erreur avec réponse du serveur
+      const { status, data } = error.response
+      
+      // Messages d'erreur personnalisés selon le code de statut
+      const errorMessages = {
+        400: data?.message || 'Données de formulaire invalides',
+        409: 'Un compte avec cet email existe déjà',
+        500: 'Erreur serveur. Veuillez réessayer plus tard.'
+      }
+
+      return {
+        status: 'error',
+        message: errorMessages[status] || 'Erreur lors de l\'inscription',
+        code: data?.code || 'SIGNUP_ERROR',
+        details: data?.details
+      }
+    }
+
+    // Erreur de connexion
+    if (error.request) {
+      return {
+        status: 'error',
+        message: 'Impossible de se connecter au serveur',
+        code: 'CONNECTION_ERROR'
+      }
+    }
+
+    // Autres erreurs
+    return {
+      status: 'error',
+      message: 'Une erreur est survenue lors de l\'inscription',
+      code: 'UNKNOWN_ERROR',
+      details: error.message
+    }
+  }
+}
 // Fonction pour transformer les données de l'API au format attendu
 const transformApiDataToGeneralStatus = (events) => {
   if (!events || !Array.isArray(events) || events.length === 0) {

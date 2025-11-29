@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
+import { signupUser } from '../api/api'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -28,35 +29,85 @@ const Signup = () => {
     setError('')
     setIsLoading(true)
 
-    // Frontend-only validation
+    // Validation côté client
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Veuillez remplir tous les champs')
+      setError({ type: 'error', message: 'Veuillez remplir tous les champs' })
       setIsLoading(false)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setError({ type: 'error', message: 'Les mots de passe ne correspondent pas' })
       setIsLoading(false)
       return
     }
 
     if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setError({ type: 'error', message: 'Le mot de passe doit contenir au moins 6 caractères' })
       setIsLoading(false)
       return
     }
 
-    // Simulate account creation (frontend only - no backend)
-    setTimeout(() => {
-      // For demo purposes, create account and auto-login
-      login({
-        email: formData.email,
-        name: formData.name,
+    try {
+      // Appel à l'API d'inscription
+      const response = await signupUser(
+        formData.name.trim(),
+        formData.email.trim().toLowerCase(),
+        formData.password
+      )
+      
+      // Vérification de la réponse
+      if (response && response.status === 'ok') {
+        // Afficher un message de succès
+        setError({ type: 'success', message: 'Compte créé avec succès ! Redirection...' })
+        
+        // Redirection vers la page de connexion après un court délai
+        setTimeout(() => {
+          navigate('/login', { 
+            state: { 
+              registrationSuccess: true,
+              email: formData.email 
+            } 
+          })
+        }, 1500)
+        
+        return
+      } 
+      
+      // Gestion des erreurs spécifiques
+      if (response && response.status === 'error') {
+        let errorMessage = 'Erreur lors de la création du compte'
+        
+        // Messages d'erreur personnalisés selon le code d'erreur
+        if (response.code === 'EMAIL_EXISTS') {
+          errorMessage = 'Un compte existe déjà avec cette adresse email'
+        } else if (response.code === 'INVALID_EMAIL') {
+          errorMessage = 'Veuillez fournir une adresse email valide'
+        } else if (response.code === 'WEAK_PASSWORD') {
+          errorMessage = 'Le mot de passe est trop faible. Utilisez au moins 6 caractères.'
+        } else if (response.message) {
+          errorMessage = response.message
+        }
+        
+        setError({ type: 'error', message: errorMessage })
+      } else {
+        // Réponse inattendue
+        setError({ 
+          type: 'error', 
+          message: 'Réponse inattendue du serveur. Veuillez réessayer plus tard.' 
+        })
+      }
+      
+    } catch (error) {     
+      // Erreur inattendue
+      console.error('Erreur lors de la création de compte:', error)
+      setError({ 
+        type: 'error', 
+        message: 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.' 
       })
+    } finally {
       setIsLoading(false)
-      navigate('/')
-    }, 500)
+    }
   }
 
   return (
@@ -81,10 +132,16 @@ const Signup = () => {
             <p className="text-neon-green/70 text-sm font-mono uppercase">Créer un compte</p>
           </div>
 
-          {/* Error message */}
+          {/* Messages d'état */}
           {error && (
-            <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm animate-fadeIn">
-              {error}
+            <div 
+              className={`mb-6 p-3 rounded-lg text-sm animate-fadeIn ${
+                (typeof error === 'object' ? error.type : 'error') === 'error' 
+                  ? 'bg-red-500/20 border border-red-500/50 text-red-400' 
+                  : 'bg-green-500/20 border border-green-500/50 text-green-400'
+              }`}
+            >
+              {typeof error === 'object' ? error.message : error}
             </div>
           )}
 

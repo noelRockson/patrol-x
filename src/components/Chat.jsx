@@ -469,7 +469,10 @@ const Chat = ({ onClose, isMobile }) => {
         </div>
         {onClose && (
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
             className="relative z-10 ml-3 p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50"
             aria-label="Fermer le chat"
           >

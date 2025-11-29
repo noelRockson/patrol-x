@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
+import { loginUser } from '../api/api'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -33,16 +34,48 @@ const Login = () => {
       return
     }
 
-    // Simulate login (frontend only - no backend)
-    setTimeout(() => {
-      // For demo purposes, accept any email/password
-      login({
-        email: formData.email,
-        name: formData.email.split('@')[0],
-      })
+    // Validation du format email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setError('Veuillez entrer une adresse email valide')
       setIsLoading(false)
-      navigate('/')
-    }, 500)
+      return
+    }
+
+    // Validation de la longueur du mot de passe
+    if (formData.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      // Login user
+      const response = await loginUser(formData.email, formData.password)
+      console.log('response: ', response)
+      
+      if (response && response.status === 'ok') {
+        login({
+          email: formData.email,
+          name: formData.email.split('@')[0],
+        })
+        setIsLoading(false)
+        navigate('/')
+      } else if (response && response.status === 'error') {
+        // Afficher l'erreur retournée par l'API
+        setError(response.message || 'Erreur lors de la connexion')
+        setIsLoading(false)
+      } else {
+        // Réponse inattendue
+        setError('Erreur lors de la connexion. Veuillez réessayer.')
+        setIsLoading(false)
+      }
+    } catch (error) {
+      // Erreur inattendue
+      console.error('Erreur lors de la connexion:', error)
+      setError('Une erreur inattendue s\'est produite. Veuillez réessayer.')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -69,8 +102,14 @@ const Login = () => {
 
           {/* Error message */}
           {error && (
-            <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm animate-fadeIn">
-              {error}
+            <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500/50 rounded-lg text-red-400 text-sm animate-fadeIn flex items-start gap-3">
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold mb-1">Erreur de connexion</p>
+                <p className="text-red-300">{error}</p>
+              </div>
             </div>
           )}
 
