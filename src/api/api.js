@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_BASE_URL = import.meta.env.VITE_API_URL + 'api' ||'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL + 'api' || 'http://localhost:3000/api'
 const CTR_CENTER_ENDPOINT = import.meta.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 
 const api = axios.create({
@@ -50,7 +50,7 @@ const transformApiDataToGeneralStatus = (events) => {
 
     // Grouper par zone (location)
     const zoneName = event.location || 'Général'
-    
+
     if (!zonesMap.has(zoneName)) {
       zonesMap.set(zoneName, {
         name: zoneName,
@@ -92,7 +92,7 @@ const transformApiDataToGeneralStatus = (events) => {
     summary,
     zones,
     lastUpdate: new Date().toISOString(),
-    rawEvents: events, 
+    rawEvents: events,
   }
 }
 
@@ -122,7 +122,7 @@ export const getGeneralStatus = async () => {
 // GET /zone/:name
 export const getZoneData = async (zoneName) => {
   await simulateDelay(800)
-  
+
   // Simulation de données pour toutes les communes
   const mockData = {
     'Delmas': {
@@ -196,7 +196,7 @@ export const getZoneData = async (zoneName) => {
 
   try {
     const response = await api.get(`/zone/${zoneName}`)
-    console.log('endpoint: ',zoneName)
+    console.log('endpoint: ', zoneName)
     return { data: response.data }
   } catch (error) {
     console.error('Error fetching zone data:', error)
@@ -223,14 +223,24 @@ export const askQuestion = async (prompt) => {
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       throw new Error('Prompt is required and must be a non-empty string')
     }
-    
+
     const trimmedPrompt = prompt.trim()
-    
+
+    // Logs pour déboguer
+    console.log('🔍 [API] Configuration:', {
+      baseURL: API_BASE_URL,
+      endpoint: '/ask',
+      fullURL: `${API_BASE_URL}/ask`,
+      prompt: trimmedPrompt
+    })
+
     // Envoyer la requête POST au backend avec le format { prompt: message }
     const response = await api.post('/ask', {
       prompt: trimmedPrompt,
     })
-    
+
+    console.log('✅ [API] Réponse reçue:', response.data)
+
     // Retourner la réponse normalisée
     return {
       data: {
@@ -239,11 +249,22 @@ export const askQuestion = async (prompt) => {
       },
     }
   } catch (error) {
-    console.error('[api.js] Error asking question:', error.message)
-    
+    console.error('❌ [API] Error asking question:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method,
+        data: error.config?.data
+      }
+    })
+
     // En cas d'erreur, retourner une réponse de fallback
     const lowerPrompt = prompt ? prompt.toLowerCase() : ''
-    
+
     // Réponses de fallback basiques
     if (lowerPrompt.includes('urgence') || lowerPrompt.includes('urgent')) {
       return {

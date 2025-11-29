@@ -50,13 +50,13 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
       if (onZoneSelect) {
         onZoneSelect()
       }
-      
+
       const loadZoneData = async () => {
         setIsLoading(true)
         try {
           const response = await getZoneData(activeZone)
           const data = response.data
-          
+
           setZoneData(data)
           setPriorities(data.status)
         } catch (error) {
@@ -75,14 +75,14 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
     if (onZoneSelect) {
       onZoneSelect()
     }
-    
+
     setIsLoading(true)
     setActiveZone(zoneName)
-    
+
     try {
       const response = await getZoneData(zoneName)
       const data = response.data
-      
+
       setZoneData(data)
       setPriorities(data.status)
     } catch (error) {
@@ -145,45 +145,43 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
       {/* Header */}
       <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
         <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
-          {isDisabled 
+          {isDisabled
             ? 'Centre de contrôle' // ? 'État des lieux — Vue d\'ensemble' 
-            : activeZone 
+            : activeZone
               ? `État des lieux — ${activeZone}`
               : 'État des lieux'
           }
         </h2>
-        
+
         {/* AFFICHAGE DES ZONES (CHIPS/TAGS) */}
         {selectedZone && selectedZone.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-3 animate-fadeIn">
             {selectedZone.map((zone, index) => {
               const isActive = activeZone === zone
               return (
-                <div 
+                <div
                   key={`${zone}-${index}`}
                   onClick={() => handleLoadZoneData(zone)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-600 dark:bg-blue-700 text-white border-blue-600 dark:border-blue-700 ring-2 ring-blue-300 dark:ring-blue-600'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800/50'
-                  }`}
+                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border shadow-sm transition-all duration-300 cursor-pointer ${isActive
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-transparent ring-2 ring-blue-300 dark:ring-blue-600 shadow-lg shadow-blue-500/30 scale-105'
+                      : 'glass text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50 hover:shadow-md hover:scale-105 active:scale-95'
+                    }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <span>{zone}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      // Si c'est le dernier tag, réinitialiser complètement
                       if (selectedZone.length === 1) {
                         clearSelectedZones()
                       } else {
                         removeSelectedZone(zone)
                       }
                     }}
-                    className={`ml-0.5 p-0.5 rounded-full transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                      isActive
-                        ? 'text-white hover:bg-blue-500 dark:hover:bg-blue-600'
-                        : 'text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-800'
-                    }`}
+                    className={`ml-0.5 p-0.5 rounded-full transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${isActive
+                        ? 'text-white hover:bg-blue-400 dark:hover:bg-blue-700'
+                        : 'text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-800/50'
+                      }`}
                     aria-label={`Retirer ${zone}`}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,28 +193,27 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
             })}
           </div>
         )}
-        
+
+
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6">
         {isDisabled ? (
           <>
-            {/* Titre pour l'état général
-            <div className="mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                📊 Vue d'ensemble — Port-au-Prince
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Statistiques agrégées de toutes les zones
-              </p>
-            </div> */}
-            
             {/* Statistiques générales */}
             <div className="space-y-3 md:space-y-4">
               {categories.map((category, index) => {
                 const filteredEvents = getFilteredEvents(category)
                 const isSelected = selectedCategory === category.priority
+
+                // Gradients personnalisés selon la catégorie
+                const categoryGradient = category.priority === 'urgent'
+                  ? 'from-red-50 via-orange-50 to-red-50 dark:from-red-900/20 dark:via-orange-900/20 dark:to-red-900/20'
+                  : category.priority === 'pertinent'
+                    ? 'from-blue-50 via-cyan-50 to-blue-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20'
+                    : 'from-gray-50 via-slate-50 to-gray-50 dark:from-gray-700/20 dark:via-slate-700/20 dark:to-gray-700/20'
+
                 return (
                   <div
                     key={index}
@@ -225,13 +222,22 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                         setSelectedCategory(isSelected ? null : category.priority)
                       }
                     }}
-                    className={`p-4 rounded-xl border-2 transition-all bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 ${
-                      category.count > 0 ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'
-                    } ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
+                    className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 bg-gradient-to-r ${categoryGradient} animate-fadeIn hover:-translate-y-1 ${category.count > 0
+                        ? 'cursor-pointer active:scale-[0.98] hover:shadow-lg dark:hover:shadow-gray-900/50 border-gray-200 dark:border-gray-600'
+                        : 'cursor-default opacity-70 border-gray-100 dark:border-gray-700'
+                      } ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400 shadow-lg' : ''}`}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="flex items-center justify-between">
+                    {/* Effet de brillance au hover */}
+                    {category.count > 0 && (
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    )}
+
+                    <div className="flex items-center justify-between relative z-10">
                       <div className="flex items-center gap-3">
-                        <div className="text-2xl">{category.emoji}</div>
+                        <div className="text-3xl transition-transform duration-300 group-hover:scale-110">
+                          {category.emoji}
+                        </div>
                         <div>
                           <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
                             {category.label}
@@ -243,11 +249,11 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                           </div>
                         </div>
                       </div>
-                      <div className={`text-2xl md:text-3xl font-bold ${category.color}`}>
+                      <div className={`text-3xl md:text-4xl font-bold transition-all duration-300 ${category.color} group-hover:scale-110`}>
                         {category.count}
                       </div>
                     </div>
-                    
+
                     {/* Afficher les détails si la catégorie est sélectionnée */}
                     {isSelected && filteredEvents.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
@@ -283,11 +289,10 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                                       </span>
                                     )}
                                     {event.severity && (
-                                      <span className={`inline-block px-2 py-0.5 rounded text-xs ${
-                                        event.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
-                                        event.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                                        'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                      }`}>
+                                      <span className={`inline-block px-2 py-0.5 rounded text-xs ${event.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                                          event.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                            'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        }`}>
                                         {event.severity}
                                       </span>
                                     )}
@@ -345,41 +350,41 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                   {generalStatus.zones
                     .sort((a, b) => (b.urgent + b.pertinent) - (a.urgent + a.pertinent)) // Trier par nombre d'incidents
                     .map((zone, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
-                    >
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {zone.name}
-                      </span>
-                      <div className="flex items-center gap-2 text-xs">
-                        {zone.urgent > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold">
-                            🔥{zone.urgent}
-                          </span>
-                        )}
-                        {zone.pertinent > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold">
-                            📌{zone.pertinent}
-                          </span>
-                        )}
-                        {zone.ignored > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
-                            💤{zone.ignored}
-                          </span>
-                        )}
-                        {zone.urgent === 0 && zone.pertinent === 0 && zone.ignored === 0 && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500 italic">
-                            Aucun incident
-                          </span>
-                        )}
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {zone.name}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs">
+                          {zone.urgent > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold">
+                              🔥{zone.urgent}
+                            </span>
+                          )}
+                          {zone.pertinent > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold">
+                              📌{zone.pertinent}
+                            </span>
+                          )}
+                          {zone.ignored > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                              💤{zone.ignored}
+                            </span>
+                          )}
+                          {zone.urgent === 0 && zone.pertinent === 0 && zone.ignored === 0 && (
+                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                              Aucun incident
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             )}
-            
+
             {/* Message de chargement */}
             {!generalStatus && (
               <div className="text-center text-gray-400 dark:text-gray-500 py-8">
@@ -396,11 +401,10 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
               return (
                 <div
                   key={index}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    isDisabled
+                  className={`p-4 rounded-xl border-2 transition-all ${isDisabled
                       ? 'opacity-50 cursor-not-allowed'
                       : `${category.bgColor} dark:bg-gray-700/50 ${category.borderColor} dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 cursor-pointer active:scale-[0.98]`
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

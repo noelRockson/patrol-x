@@ -143,11 +143,11 @@ const Layout = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isPrioritiesOpen, setIsPrioritiesOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  
+
   // Initialiser le mode dark depuis SafeStorage (localStorage sécurisé)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === 'undefined') return false
-    
+
     const saved = SafeStorage.get('darkMode', false)
     if (saved) {
       document.documentElement.classList.add('dark')
@@ -160,7 +160,7 @@ const Layout = () => {
   // Appliquer le thème quand il change
   useEffect(() => {
     const root = document.documentElement
-    
+
     if (isDarkMode) {
       root.classList.add('dark')
       SafeStorage.set('darkMode', true)
@@ -169,7 +169,7 @@ const Layout = () => {
       SafeStorage.set('darkMode', false)
     }
   }, [isDarkMode])
-  
+
   // Fonction pour basculer le mode sombre/clair
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev)
@@ -180,10 +180,10 @@ const Layout = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
+
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -196,38 +196,44 @@ const Layout = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex flex-col relative bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="h-screen flex flex-col relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-500">
         {/* Notice hors ligne */}
         <OfflineNotice />
-        
+
         {/* ==========================================
             HEADER avec logo et contrôles
             ========================================== */}
-        <div className="h-14 md:h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-sm">
+        <div className="h-14 md:h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-lg relative overflow-hidden">
+          {/* Gradient animé en arrière-plan */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-gradient opacity-50" />
+
           {/* Logo et titre */}
-          <div className="flex items-center gap-2 md:gap-3">
-            <Logo width={isMobile ? 28 : 32} height={isMobile ? 28 : 32} />
-            <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-2 md:gap-3 relative z-10">
+            <div className="transition-transform duration-300 hover:scale-110">
+              <Logo width={isMobile ? 28 : 32} height={isMobile ? 28 : 32} />
+            </div>
+            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               Patrol-X
             </h1>
+            <div className="hidden md:block px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
+              Live
+            </div>
           </div>
 
           {/* Contrôles à droite */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative z-10">
             {/* Bouton toggle dark/light mode */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="group p-2 text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-600 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
               aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
             >
               {isDarkMode ? (
-                // Icône soleil (mode clair)
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 transition-transform duration-500 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               ) : (
-                // Icône lune (mode sombre)
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 transition-transform duration-500 group-hover:rotate-[-20deg]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
@@ -237,7 +243,7 @@ const Layout = () => {
             {isMobile && (
               <button
                 onClick={() => setIsPrioritiesOpen(!isPrioritiesOpen)}
-                className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-600 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
                 aria-label="Menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +258,7 @@ const Layout = () => {
             CONTENU PRINCIPAL
             ========================================== */}
         <div className="flex flex-1 overflow-hidden">
-          
+
           {/* Desktop: Colonne gauche - État des lieux (toujours visible) */}
           {!isMobile && (
             <div className="w-1/3 lg:w-1/4 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
@@ -266,14 +272,14 @@ const Layout = () => {
           {isMobile && isPrioritiesOpen && (
             <>
               {/* Backdrop sombre */}
-              <div 
+              <div
                 className="fixed inset-0 bg-black/50 z-[2000] transition-opacity"
                 onClick={() => setIsPrioritiesOpen(false)}
                 aria-label="Fermer le menu"
               />
-              
+
               {/* Drawer qui slide depuis la gauche */}
-              <div 
+              <div
                 className="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-white dark:bg-gray-800 shadow-2xl z-[2001] transform transition-transform"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -297,7 +303,7 @@ const Layout = () => {
                     </svg>
                   </button>
                 </div>
-                
+
                 {/* Contenu scrollable du drawer */}
                 <div className="overflow-y-auto" style={{ height: 'calc(100% - 73px)' }}>
                   <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
@@ -313,15 +319,21 @@ const Layout = () => {
             <Suspense fallback={<LoadingSpinner message="Chargement de la carte..." />}>
               <MapView onZoneSelect={() => setIsChatOpen(true)} />
             </Suspense>
-            
+
             {/* Bouton flottant pour ouvrir le chat (affiché seulement si le chat est fermé) */}
             {!isChatOpen && (
               <button
                 onClick={() => setIsChatOpen(true)}
-                className="fixed md:absolute bottom-6 md:bottom-6 right-6 md:right-6 z-[1001] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-4 md:p-4 rounded-full shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                className="group fixed md:absolute bottom-6 md:bottom-6 right-6 md:right-6 z-[1001] bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300 animate-pulse-slow"
                 aria-label="Ouvrir le chat"
               >
-                <svg className="w-6 h-6 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Effet de brillance pulsant */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+
+                {/* Cercle d'onde animé */}
+                <div className="absolute inset-0 rounded-full border-2 border-blue-400 animate-ping opacity-20" />
+
+                <svg className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </button>
@@ -336,19 +348,19 @@ const Layout = () => {
           <>
             {/* Overlay sombre pour mobile */}
             {isMobile && (
-              <div 
+              <div
                 className="fixed inset-0 bg-black/50 z-[1999]"
                 onClick={() => setIsChatOpen(false)}
                 aria-label="Fermer le chat"
               />
             )}
-            
+
             {/* Panneau chat */}
-            <div 
+            <div
               className={`
                 fixed z-[2000] bg-white dark:bg-gray-800 shadow-2xl flex flex-col
-                ${isMobile 
-                  ? 'inset-x-0 bottom-0 rounded-t-3xl' 
+                ${isMobile
+                  ? 'inset-x-0 bottom-0 rounded-t-3xl'
                   : 'top-14 md:top-16 bottom-0 right-0 w-full md:w-1/2 lg:w-1/3 border-l border-gray-200 dark:border-gray-700'
                 }
               `}
@@ -360,7 +372,7 @@ const Layout = () => {
                   <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
                 </div>
               )}
-              
+
               {/* Composant Chat avec lazy loading */}
               <Suspense fallback={<LoadingSpinner message="Chargement du chat..." />}>
                 <Chat onClose={() => setIsChatOpen(false)} isMobile={isMobile} />

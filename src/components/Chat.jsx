@@ -16,7 +16,7 @@
 //     chatLoading,
 //     setChatLoading, 
 //   } = useStore()
-  
+
 //   const [inputValue, setInputValue] = useState('')
 //   const messagesEndRef = useRef(null)
 //   const isOnline = useOnlineStatus()
@@ -39,22 +39,22 @@
 //     const hasSelectedZone = selectedZone && selectedZone.length > 0
 //     if (zoneData && zoneData.summary && hasSelectedZone) {
 //       const zoneToShow = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
-      
+
 //       // Ne pas afficher l'état général dans le chat
 //       const isGeneral = zoneData.zone && zoneData.zone.includes('Général')
 //       if (isGeneral) {
 //         return
 //       }
-      
+
 //       // Utiliser la zone du zoneData si disponible, sinon la zone active/sélectionnée
 //       const actualZone = zoneData.zone || zoneToShow
 //       const messageText = `**État des lieux — ${actualZone}**\n\n${zoneData.summary}`
-      
+
 //       // Vérifier si ce message exact n'existe pas déjà (évite les doublons)
 //       const messageExists = messages.some(
 //         msg => msg.text === messageText && !msg.isUser
 //       )
-      
+
 //       if (!messageExists) {
 //         console.log('Adding new zone message:', actualZone, zoneData.summary.substring(0, 50))
 //         addMessage({
@@ -95,7 +95,7 @@
 //   // Gestion de l'envoi de message
 //   const handleSubmit = async (e) => {
 //     e.preventDefault()
-    
+
 //     if (!inputValue.trim() || chatLoading) return
 
 //     // Vérifier si l'utilisateur est en ligne
@@ -124,7 +124,7 @@
 //       // Utiliser activeZone pour l'API, sinon la dernière zone sélectionnée
 //       const zoneToUse = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
 //       const response = await askQuestion(zoneToUse || null, question)
-      
+
 //       const aiMessage = {
 //         text: response.data.response,
 //         isUser: false,
@@ -190,7 +190,7 @@
 //             isUser={msg.isUser} 
 //           />
 //         ))}
-        
+
 //         {/* Indicateur de chargement */}
 //         {chatLoading && (
 //           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm py-2">
@@ -198,7 +198,7 @@
 //             <span className="italic">En cours de traitement...</span>
 //           </div>
 //         )}
-        
+
 //         <div ref={messagesEndRef} />
 //       </div>
 
@@ -256,18 +256,18 @@ const decodeHtmlEntities = (text) => {
 };
 
 const Chat = ({ onClose, isMobile }) => {
-  const { 
-    selectedZone, 
-    activeZone, 
-    zoneData, 
-    messages, 
-    addMessage, 
-    setMessages, 
+  const {
+    selectedZone,
+    activeZone,
+    zoneData,
+    messages,
+    addMessage,
+    setMessages,
     chatLoading,
     setChatLoading,
     isLoading, // Pour afficher le loading lors du chargement de zone
   } = useStore()
-  
+
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef(null)
   const isOnline = useOnlineStatus()
@@ -283,6 +283,7 @@ const Chat = ({ onClose, isMobile }) => {
           text: 'Bonjour ! Je suis votre assistant Patrol-X. Vous pouvez me poser des questions sur les zones de Port-au-Prince, ou discuter avec moi. Pour voir l\'état des lieux d\'une zone spécifique, sélectionnez-la sur la carte.',
           isUser: false,
           timestamp: Date.now(),
+          isAIResponse: false, // Message système, pas de typing
         },
       ])
     }
@@ -300,26 +301,26 @@ const Chat = ({ onClose, isMobile }) => {
     if (isGeneral) {
       return
     }
-    
+
     // Utiliser la zone du zoneData si disponible, sinon la zone active/sélectionnée
     const zoneToShow = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
     const actualZone = zoneData.zone || zoneToShow
-    
+
     // Créer un identifiant unique pour cette zone + summary
     const zoneKey = `${actualZone}:${zoneData.summary.substring(0, 50)}`
-    
+
     // Vérifier si on a déjà affiché cette zone exacte
     if (lastDisplayedZoneRef.current === zoneKey) {
       console.log('🚫 Message ignoré - déjà affiché:', actualZone)
       return
     }
-    
-const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntities(zoneData.summary)}`    
+
+    const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntities(zoneData.summary)}`
     // Vérifier si ce message exact n'existe pas déjà
     const messageExists = messages.some(
       msg => msg.text === messageText && !msg.isUser
     )
-    
+
     if (!messageExists) {
       console.log('✅ Ajout du message pour:', actualZone)
       lastDisplayedZoneRef.current = zoneKey
@@ -327,6 +328,7 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
         text: messageText,
         isUser: false,
         timestamp: Date.now(),
+        isAIResponse: false, // Message automatique de zone, pas de typing
       })
     } else {
       console.log('🚫 Message ignoré - existe déjà:', actualZone)
@@ -334,7 +336,7 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
   }, [
     zoneData?.zone,
     zoneData?.summary,
-    activeZone, 
+    activeZone,
     selectedZone?.length, // Utiliser .length au lieu de l'array entier
     addMessage,
     messages.length // Utiliser .length au lieu de l'array entier
@@ -349,6 +351,7 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
           text: 'Sélectionnez une zone sur la carte pour voir son état des lieux.',
           isUser: false,
           timestamp: Date.now(),
+          isAIResponse: false, // Message système, pas de typing
         })
       }
     }
@@ -362,82 +365,112 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
   // Gestion de l'envoi de message
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!inputValue.trim() || chatLoading) return;
-  
+
     const userMessage = {
       text: inputValue,
       isUser: true,
       timestamp: Date.now(),
     };
-  
+
     addMessage(userMessage);
     const question = inputValue.trim();
     setInputValue('');
     setChatLoading(true);
-  
+
     // Validation avant d'envoyer
     if (!question || question.length === 0) {
       setChatLoading(false);
       return;
     }
-  
+
     try {
       console.log('Chat.jsx - Envoi de la question:', question);
       const response = await askQuestion(question);
       console.log('Réponse du serveur:', response); // Pour le débogage
 
-      // Vérifier si la réponse est directement une chaîne ou un objet avec une propriété 'response'
-      const responseText = typeof response === 'string' 
-        ? response 
-        : response?.data?.response || response?.response || 'Réponse reçue';
+      // Extraire le texte de la réponse - gérer plusieurs formats possibles
+      let responseText = '';
+
+      if (typeof response === 'string') {
+        // Si la réponse est directement une string
+        responseText = response;
+      } else if (response?.data?.response) {
+        // Format standard: { data: { response: "texte" } }
+        responseText = response.data.response;
+      } else if (response?.response) {
+        // Format alternatif: { response: "texte" }
+        responseText = response.response;
+      } else if (response?.data && typeof response.data === 'string') {
+        // Format: { data: "texte" }
+        responseText = response.data;
+      } else {
+        // Fallback: essayer de convertir en JSON puis extraire
+        console.warn('Format de réponse inattendu:', response);
+        responseText = 'Réponse reçue mais format inattendu';
+      }
+
+      // S'assurer que c'est bien une string
+      if (typeof responseText !== 'string') {
+        console.error('responseText n\'est pas une string:', responseText);
+        responseText = JSON.stringify(responseText);
+      }
 
       const aiMessage = {
         text: responseText,
         isUser: false,
         timestamp: Date.now(),
+        isAIResponse: true, // Vraie réponse de l'IA, activer le typing
       };
-  
+
       addMessage(aiMessage);
     } catch (error) {
       addMessage({
         text: `⚠️ ${handleApiError(error)}`,
         isUser: false,
         timestamp: Date.now(),
+        isAIResponse: false, // Message d'erreur, pas de typing
       });
     } finally {
       setChatLoading(false);
     }
   };
-  
+
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
       {/* Header */}
-      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white dark:bg-gray-800">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
-            Chat IA
-          </h2>
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between shrink-0 bg-gradient-to-r from-white via-blue-50/30 to-white dark:from-gray-800 dark:via-blue-900/10 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden">
+        {/* Gradient animé subtil */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent animate-shimmer" style={{ animationDuration: '3s' }} />
+
+        <div className="flex-1 min-w-0 relative z-10">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Chat IA
+            </h2>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="En ligne" />
+          </div>
           {(selectedZone && selectedZone.length > 0) ? (
             <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              {activeZone 
-                ? `Zone active : ${activeZone}`
-                : selectedZone.length === 1 
-                  ? `Zone : ${selectedZone[0]}`
-                  : `Zones (${selectedZone.length}) : ${selectedZone.join(', ')}`
+              {activeZone
+                ? `📍 Zone active : ${activeZone}`
+                : selectedZone.length === 1
+                  ? `📍 Zone : ${selectedZone[0]}`
+                  : `📍 Zones (${selectedZone.length}) : ${selectedZone.join(', ')}`
               }
             </p>
           ) : (
             <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              Vue d'ensemble — Port-au-Prince
+              🌍 Vue d'ensemble — Port-au-Prince
             </p>
           )}
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="ml-3 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="relative z-10 ml-3 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
             aria-label="Fermer le chat"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,21 +483,30 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 bg-gray-50 dark:bg-gray-900">
         {messages.map((msg, index) => (
-          <ChatMessage 
-            key={`${msg.timestamp}-${index}`} 
-            message={msg.text} 
-            isUser={msg.isUser} 
+          <ChatMessage
+            key={`${msg.timestamp}-${index}`}
+            message={msg.text}
+            isUser={msg.isUser}
+            isAIResponse={msg.isAIResponse || false}
           />
         ))}
-        
+
         {/* Indicateur de chargement pour les questions du chat */}
         {chatLoading && (
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm py-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
-            <span className="italic">En cours de traitement...</span>
+          <div className="flex items-start gap-3 mb-4 animate-fadeIn">
+            <div className="inline-block px-4 py-3 rounded-2xl bg-white dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 shadow-sm">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+                <span className="text-xs italic">Réflexion en cours</span>
+              </div>
+            </div>
           </div>
         )}
-        
+
         {/* Indicateur de chargement pour le chargement des données de zone (seulement si une zone est sélectionnée) */}
         {isLoading && activeZone && selectedZone && selectedZone.length > 0 && (
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm py-2">
@@ -472,7 +514,7 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
             <span className="italic">Chargement des données de la zone...</span>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -492,16 +534,21 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
             <button
               type="submit"
               disabled={!inputValue.trim() || chatLoading || !isOnline}
-              className="px-5 py-3 text-sm md:text-base bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors shrink-0 font-medium"
+              className="group relative px-5 py-3 text-sm md:text-base bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed disabled:shadow-none shrink-0 font-medium overflow-hidden"
               aria-label="Envoyer le message"
             >
-              {isMobile ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              ) : (
-                'Envoyer'
-              )}
+              {/* Effet shimmer sur le bouton */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
+
+              <span className="relative z-10 flex items-center gap-1">
+                {isMobile ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                ) : (
+                  'Envoyer'
+                )}
+              </span>
             </button>
           </div>
         </form>
