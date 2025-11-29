@@ -355,17 +355,21 @@ const Layout = () => {
             </Suspense>
 
 
-            {/* Bouton flottant pour ouvrir le chat (affiché seulement si le chat est fermé) */}
-            {!isChatOpen && (
+              {/* Bouton flottant pour ouvrir le chat (affiché seulement si le chat est fermé) */}
+              {!isChatOpen && (
               <button
                 onClick={() => setIsChatOpen(true)}
-                className="group fixed md:absolute bottom-20 md:bottom-20 right-6 md:right-6 z-[1001] glass border-2 border-neon-green text-neon-green p-4 rounded-full shadow-neon-green-lg hover:shadow-neon-green transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-neon-green/50 animate-pulse-slow"
+                className="group fixed md:absolute bottom-8 md:bottom-10 right-6 md:right-6 z-[1001] bg-gray-900/90 border border-neon-green/50 text-neon-green p-4 rounded-full hover:bg-gray-800 hover:border-neon-green transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-neon-green/50 backdrop-blur-sm"
+                style={{ boxShadow: '0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.1)' }}
                 aria-label="Ouvrir le chat"
               >
-                {/* Cercle d'onde animé */}
-                <div className="absolute inset-0 rounded-full border-2 border-neon-green animate-ping opacity-20" />
+                {/* Cercle d'onde animé subtil */}
+                <div className="absolute inset-0 rounded-full border border-neon-green/30 animate-ping opacity-20" />
+                
+                {/* Effet de brillance en rotation */}
+                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 0, 0.2) 90deg, transparent 180deg)', animation: 'spin 3s linear infinite' }} />
 
-                <svg className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </button>

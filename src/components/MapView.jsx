@@ -1075,49 +1075,25 @@ const MapView = ({ onZoneSelect }) => {
       </div>
 
       {/* Enhanced CTA Button */}
-      <div className="absolute bottom-16 md:bottom-20 left-0 right-0 z-[1000] flex justify-center pointer-events-none">
-        <div className="relative group pointer-events-auto">
-          {/* Glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
-          
-          {/* Button */}
-          <button className="relative max-w-2xl mx-4 backdrop-blur-xl bg-gradient-to-r from-slate-900/90 via-cyan-900/70 to-slate-900/90 border-2 border-cyan-400/50 rounded-2xl px-6 md:px-8 py-4 md:py-5 shadow-2xl hover:shadow-cyan-500/50 hover:border-cyan-400 transition-all duration-300 group-hover:scale-105 active:scale-95">
-            <div className="flex items-center gap-3">
-              {/* Animated icon */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-cyan-400 rounded-full blur-md opacity-50 animate-pulse" />
-                <svg className="w-5 h-5 md:w-6 md:h-6 text-cyan-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      {/* Afficher le message uniquement si aucune zone n'est sélectionnée et le rendre plus petit */}
+      {(!selectedZone || selectedZone.length === 0) && (
+        <div className="absolute bottom-8 md:bottom-10 left-0 right-0 z-[1000] flex justify-center pointer-events-none">
+          <div className="relative group pointer-events-auto">
+            {/* Button compact */}
+            <button className="relative mx-4 glass border border-neon-green/40 rounded-lg px-3 md:px-4 py-2 md:py-2.5 shadow-neon-green hover:border-neon-green/60 transition-all duration-300">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-neon-green/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                 </svg>
-              </div>
-              
-              <div className="text-left">
-                <p className="text-sm md:text-base text-cyan-400 font-bold uppercase tracking-wider font-mono whitespace-nowrap">
-                  Sélectionnez une zone
-                </p>
-                <p className="text-xs text-emerald-400/70 font-mono uppercase tracking-wide">
-                  Pour analyse détaillée
+                <p className="text-xs md:text-sm text-neon-green/80 font-mono uppercase tracking-wider whitespace-nowrap">
+                  Cliquez sur une zone
                 </p>
               </div>
-              
-              {/* Arrow indicator */}
-              <svg className="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </div>
-            
-            {/* Animated border */}
-            <div className="absolute inset-0 rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-shimmer" style={{
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 3s ease-in-out infinite'
-              }} />
-            </div>
           </button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
-
 export default MapView
