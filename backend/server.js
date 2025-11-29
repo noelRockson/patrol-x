@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000
 const API_CTR_CENTER_URL = process.env.VITE_API_CTR_CENTER_URL
 const API_CTR_CENTER_URL_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 const API_CTR_CENTER_URL_LOCATION_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_LOCATION_ENDPOINT
+const API_CTR_CENTER_URL_CHAT_ENDPOINT = process.env.VITE_API_CTR_CENTER_URL_CHAT_ENDPOINT || '/chat'
 const EVENTS_CACHE_TTL_MS = Number(process.env.EVENTS_CACHE_TTL_MS)
 // const url = API_CTR_CENTER_URL && API_CTR_CENTER_URL_ENDPOINT
 //   ? `${API_CTR_CENTER_URL}${API_CTR_CENTER_URL_ENDPOINT}`
@@ -34,12 +35,28 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' })
+// Middleware de logging simple
+app.use((req, res, next) => {
+  if (req.path === '/api/ask') {
+    console.log(`[backend] ${req.method} ${req.path}`)
+  }
+  next()
 })
 
-app.get('/api/test', (req, res) => {
-  res.json({ status: 'test ok' })
+app.get('/api/health', (req, res) => {
+  console.log('[backend] Health check appelé')
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Endpoint de test pour POST
+app.post('/api/test', (req, res) => {
+  console.log('[backend] ===== TEST POST =====')
+  console.log('[backend] Body reçu:', req.body)
+  res.json({ 
+    status: 'ok', 
+    received: req.body,
+    timestamp: new Date().toISOString() 
+  })
 })
 
 app.get('/api/events/latest', async (req, res) => {
@@ -153,8 +170,71 @@ app.get('/api/zone/:name', async (req, res) => {
   }
 })
 
+// POST /api/ask - Envoyer une question au chat
+app.post('/api/ask', async (req, res) => {
+  const { prompt } = req.body
+  
+  console.log('[backend] POST /api/ask - prompt reçu:', prompt)
+  
+  // Validation
+  if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+    return res.status(400).json({
+      error: 'Prompt is required and must be a non-empty string',
+    })
+  }
+
+  if (!API_CTR_CENTER_URL) {
+    return res.status(500).json({
+      error: 'API_CTR_CENTER_URL is not configured on the server',
+    })
+  }
+
+  // Construire l'URL de l'API externe pour le chat
+  const chatUrl = `${API_CTR_CENTER_URL}${API_CTR_CENTER_URL_CHAT_ENDPOINT}`
+  
+  console.log('[backend] POST /api/ask - prompt:', prompt)
+  console.log('[backend] Calling external API:', chatUrl)
+
+  try {
+    // Envoyer la requête à l'API externe avec le format { prompt: message }
+    const response = await axios.post(chatUrl, {
+      prompt: prompt,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+      },
+    })
+
+    console.log(response)
+    // Normaliser la réponse pour le frontend
+    const responseData = response.data.answer || {}
+    
+    // S'assurer que la réponse a le format attendu
+    const normalizedResponse = {
+      response: responseData || responseData.message || responseData.text || 'Réponse reçue',
+      prompt: prompt,
+    }
+
+    console.log('[backend] Response received from external API')
+    res.json(normalizedResponse)
+  } catch (error) {
+    console.error('[backend] Error calling chat API:', error.message)
+    
+    const status = error.response?.status || 500
+    const errorMessage = error.response?.data?.error || error.message || 'Failed to get response from chat API'
+    
+    res.status(status).json({
+      error: 'Failed to get response from chat API',
+      details: errorMessage,
+    })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`[backend] Server listening on port ${PORT}`)
+  console.log(`[backend] Health check: http://localhost:${PORT}/api/health`)
+  console.log(`[backend] Chat endpoint: http://localhost:${PORT}/api/ask`)
 })
 
 

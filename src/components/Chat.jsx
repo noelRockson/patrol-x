@@ -361,53 +361,55 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
 
   // Gestion de l'envoi de message
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!inputValue.trim() || chatLoading) return
-
-    if (!isOnline) {
-      const offlineMessage = {
-        text: '⚠️ Vous êtes hors ligne. Impossible d\'envoyer votre message.',
-        isUser: false,
-        timestamp: Date.now(),
-      }
-      addMessage(offlineMessage)
-      return
-    }
-
+    e.preventDefault();
+  
+    if (!inputValue.trim() || chatLoading) return;
+  
     const userMessage = {
       text: inputValue,
       isUser: true,
       timestamp: Date.now(),
+    };
+  
+    addMessage(userMessage);
+    const question = inputValue.trim();
+    setInputValue('');
+    setChatLoading(true);
+  
+    // Validation avant d'envoyer
+    if (!question || question.length === 0) {
+      setChatLoading(false);
+      return;
     }
-
-    addMessage(userMessage)
-    const question = inputValue
-    setInputValue('')
-    setChatLoading(true)
-
+  
     try {
-      const zoneToUse = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
-      const response = await askQuestion(zoneToUse || null, question)
-      
+      console.log('Chat.jsx - Envoi de la question:', question);
+      const response = await askQuestion(question);
+      console.log('Réponse du serveur:', response); // Pour le débogage
+
+      // Vérifier si la réponse est directement une chaîne ou un objet avec une propriété 'response'
+      const responseText = typeof response === 'string' 
+        ? response 
+        : response?.data?.response || response?.response || 'Réponse reçue';
+
       const aiMessage = {
-        text: response.data.response,
+        text: responseText,
         isUser: false,
         timestamp: Date.now(),
-      }
-
-      addMessage(aiMessage)
+      };
+  
+      addMessage(aiMessage);
     } catch (error) {
-      const errorMessage = {
+      addMessage({
         text: `⚠️ ${handleApiError(error)}`,
         isUser: false,
         timestamp: Date.now(),
-      }
-      addMessage(errorMessage)
+      });
     } finally {
-      setChatLoading(false)
+      setChatLoading(false);
     }
-  }
+  };
+  
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
@@ -463,8 +465,8 @@ const messageText = `**État des lieux — ${actualZone}**\n\n${decodeHtmlEntiti
           </div>
         )}
         
-        {/* Indicateur de chargement pour le chargement des données de zone */}
-        {isLoading && (
+        {/* Indicateur de chargement pour le chargement des données de zone (seulement si une zone est sélectionnée) */}
+        {isLoading && activeZone && selectedZone && selectedZone.length > 0 && (
           <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm py-2">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
             <span className="italic">Chargement des données de la zone...</span>
