@@ -141,17 +141,20 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
   }
 
   return (
-    <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
+    <div className="h-full bg-black flex flex-col">
       {/* Header */}
-      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-neon-green/30 shrink-0">
+        <h2 className="text-base md:text-lg font-mono font-bold text-neon-green uppercase tracking-wider" style={{ textShadow: '0 0 10px rgba(0,255,0,0.5)' }}>
           {isDisabled
-            ? 'Centre de contrôle' // ? 'État des lieux — Vue d\'ensemble' 
+            ? '• CENTRE DE CONTRÔLE'
             : activeZone
-              ? `État des lieux — ${activeZone}`
-              : 'État des lieux'
+              ? `• CARTE INTERACTIVE`
+              : '• CARTE INTERACTIVE'
           }
         </h2>
+        <p className="text-xs text-neon-green/60 mt-1 font-mono uppercase">
+          {isDisabled ? 'Système Online | Port-au-Prince, HT' : `Zone: ${activeZone}`}
+        </p>
 
         {/* AFFICHAGE DES ZONES (CHIPS/TAGS) */}
         {selectedZone && selectedZone.length > 0 && (
@@ -162,9 +165,9 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                 <div
                   key={`${zone}-${index}`}
                   onClick={() => handleLoadZoneData(zone)}
-                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border shadow-sm transition-all duration-300 cursor-pointer ${isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-transparent ring-2 ring-blue-300 dark:ring-blue-600 shadow-lg shadow-blue-500/30 scale-105'
-                      : 'glass text-blue-800 dark:text-blue-200 border-blue-200/50 dark:border-blue-700/50 hover:shadow-md hover:scale-105 active:scale-95'
+                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded border transition-all duration-300 cursor-pointer ${isActive
+                    ? 'bg-neon-green/20 text-neon-green border-neon-green shadow-neon-green scale-105'
+                    : 'glass text-neon-green/70 border-neon-green/30 hover:border-neon-green/50 hover:shadow-neon-green hover:scale-105 active:scale-95'
                     }`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -178,9 +181,9 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                         removeSelectedZone(zone)
                       }
                     }}
-                    className={`ml-0.5 p-0.5 rounded-full transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${isActive
-                        ? 'text-white hover:bg-blue-400 dark:hover:bg-blue-700'
-                        : 'text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 hover:bg-blue-100 dark:hover:bg-blue-800/50'
+                    className={`ml-0.5 p-0.5 rounded-full transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-neon-green ${isActive
+                      ? 'text-neon-green hover:bg-neon-green/20'
+                      : 'text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10'
                       }`}
                     aria-label={`Retirer ${zone}`}
                   >
@@ -209,10 +212,16 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
 
                 // Gradients personnalisés selon la catégorie
                 const categoryGradient = category.priority === 'urgent'
-                  ? 'from-red-50 via-orange-50 to-red-50 dark:from-red-900/20 dark:via-orange-900/20 dark:to-red-900/20'
+                  ? 'bg-black'
                   : category.priority === 'pertinent'
-                    ? 'from-blue-50 via-cyan-50 to-blue-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-blue-900/20'
-                    : 'from-gray-50 via-slate-50 to-gray-50 dark:from-gray-700/20 dark:via-slate-700/20 dark:to-gray-700/20'
+                    ? 'bg-black'
+                    : 'bg-black'
+
+                const borderColor = category.priority === 'urgent'
+                  ? 'border-neon-orange'
+                  : category.priority === 'pertinent'
+                    ? 'border-neon-pink'
+                    : 'border-gray-600'
 
                 return (
                   <div
@@ -222,15 +231,15 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                         setSelectedCategory(isSelected ? null : category.priority)
                       }
                     }}
-                    className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 bg-gradient-to-r ${categoryGradient} animate-fadeIn hover:-translate-y-1 ${category.count > 0
-                        ? 'cursor-pointer active:scale-[0.98] hover:shadow-lg dark:hover:shadow-gray-900/50 border-gray-200 dark:border-gray-600'
-                        : 'cursor-default opacity-70 border-gray-100 dark:border-gray-700'
-                      } ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400 shadow-lg' : ''}`}
+                    className={`group relative p-4 rounded-xl border-2 transition-all duration-300 ${categoryGradient} glass animate-fadeIn hover:-translate-y-1 ${category.count > 0
+                      ? `cursor-pointer active:scale-[0.98] hover:shadow-neon-green ${borderColor}${isSelected ? ' ring-2 ring-neon-green shadow-neon-green-lg' : ''}`
+                      : 'cursor-default opacity-50 border-gray-700'
+                      }`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Effet de brillance au hover */}
                     {category.count > 0 && (
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-neon-green/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                     )}
 
                     <div className="flex items-center justify-between relative z-10">
@@ -239,17 +248,17 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                           {category.emoji}
                         </div>
                         <div>
-                          <div className="font-semibold text-sm md:text-base text-gray-900 dark:text-white">
+                          <div className="font-bold text-sm md:text-base text-neon-green uppercase font-mono tracking-wide">
                             {category.label}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          <div className="text-xs text-gray-400 mt-0.5 font-mono">
                             {category.count === 0 && 'Aucun incident'}
-                            {category.count === 1 && '1 incident au total'}
-                            {category.count > 1 && `${category.count} incidents au total`}
+                            {category.count === 1 && `${category.count} incident`}
+                            {category.count > 1 && `${category.count} incidents`}
                           </div>
                         </div>
                       </div>
-                      <div className={`text-3xl md:text-4xl font-bold transition-all duration-300 ${category.color} group-hover:scale-110`}>
+                      <div className={`text-3xl md:text-4xl font-bold transition-all duration-300 ${category.priority === 'urgent' ? 'text-neon-orange' : category.priority === 'pertinent' ? 'text-neon-pink' : 'text-gray-500'} group-hover:scale-110`}>
                         {category.count}
                       </div>
                     </div>
@@ -290,8 +299,8 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                                     )}
                                     {event.severity && (
                                       <span className={`inline-block px-2 py-0.5 rounded text-xs ${event.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
-                                          event.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                                            'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        event.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                          'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                         }`}>
                                         {event.severity}
                                       </span>
@@ -342,9 +351,9 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
 
             {/* Liste des zones avec statistiques */}
             {generalStatus && generalStatus.zones && generalStatus.zones.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wide">
-                  Détails par zone
+              <div className="mt-6 pt-4 border-t border-neon-green/30">
+                <h4 className="text-xs font-bold text-neon-green mb-3 uppercase tracking-wider font-mono">
+                  •• DÉTAILS PAR ZONE
                 </h4>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {generalStatus.zones
@@ -352,19 +361,19 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                     .map((zone, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                        className="flex items-center justify-between p-2 rounded-lg glass border border-neon-green/20 hover:border-neon-green/40 transition-colors"
                       >
-                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <span className="text-xs font-medium text-neon-green/80 font-mono">
                           {zone.name}
                         </span>
                         <div className="flex items-center gap-2 text-xs">
                           {zone.urgent > 0 && (
-                            <span className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold">
+                            <span className="px-1.5 py-0.5 rounded bg-neon-orange/20 border border-neon-orange text-neon-orange text-xs font-semibold font-mono">
                               🔥{zone.urgent}
                             </span>
                           )}
                           {zone.pertinent > 0 && (
-                            <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold">
+                            <span className="px-1.5 py-0.5 rounded bg-neon-pink/20 border border-neon-pink text-neon-pink text-xs font-semibold font-mono">
                               📌{zone.pertinent}
                             </span>
                           )}
@@ -402,8 +411,8 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                 <div
                   key={index}
                   className={`p-4 rounded-xl border-2 transition-all ${isDisabled
-                      ? 'opacity-50 cursor-not-allowed'
-                      : `${category.bgColor} dark:bg-gray-700/50 ${category.borderColor} dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 cursor-pointer active:scale-[0.98]`
+                    ? 'opacity-50 cursor-not-allowed'
+                    : `${category.bgColor} dark:bg-gray-700/50 ${category.borderColor} dark:border-gray-600 hover:shadow-md dark:hover:shadow-gray-900/50 cursor-pointer active:scale-[0.98]`
                     }`}
                 >
                   <div className="flex items-center justify-between">

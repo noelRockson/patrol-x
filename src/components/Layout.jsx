@@ -145,10 +145,11 @@ const Layout = () => {
   const [isMobile, setIsMobile] = useState(false)
 
   // Initialiser le mode dark depuis SafeStorage (localStorage sécurisé)
+  // Default to dark mode for neon theme
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window === 'undefined') return false
+    if (typeof window === 'undefined') return true
 
-    const saved = SafeStorage.get('darkMode', false)
+    const saved = SafeStorage.get('darkMode', true)
     if (saved) {
       document.documentElement.classList.add('dark')
     } else {
@@ -196,27 +197,27 @@ const Layout = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex flex-col relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-500">
+      <div className="h-screen flex flex-col relative bg-black transition-all duration-500">
         {/* Notice hors ligne */}
         <OfflineNotice />
 
         {/* ==========================================
             HEADER avec logo et contrôles
             ========================================== */}
-        <div className="h-14 md:h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-lg relative overflow-hidden">
-          {/* Gradient animé en arrière-plan */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-gradient opacity-50" />
+        <div className="h-14 md:h-16 bg-black border-b border-neon-green/30 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-neon-green relative overflow-hidden">
+          {/* Subtle grid pattern background */}
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
 
           {/* Logo et titre */}
           <div className="flex items-center gap-2 md:gap-3 relative z-10">
             <div className="transition-transform duration-300 hover:scale-110">
               <Logo width={isMobile ? 28 : 32} height={isMobile ? 28 : 32} />
             </div>
-            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-lg md:text-xl font-bold text-neon-green uppercase tracking-wider" style={{ textShadow: '0 0 10px rgba(0,255,0,0.5)' }}>
               Patrol-X
             </h1>
-            <div className="hidden md:block px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
-              Live
+            <div className="hidden md:block px-2 py-1 bg-neon-green/10 border border-neon-green/50 text-neon-green text-xs font-mono font-semibold rounded uppercase">
+              Système Online
             </div>
           </div>
 
@@ -225,15 +226,15 @@ const Layout = () => {
             {/* Bouton toggle dark/light mode */}
             <button
               onClick={toggleDarkMode}
-              className="group p-2 text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-600 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
+              className="group p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50 hover:shadow-neon-green"
               aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
             >
               {isDarkMode ? (
-                <svg className="w-6 h-6 transition-transform duration-500 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 transition-transform duration-500 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 transition-transform duration-500 group-hover:rotate-[-20deg]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 transition-transform duration-500 group-hover:rotate-[-20deg]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
@@ -243,10 +244,10 @@ const Layout = () => {
             {isMobile && (
               <button
                 onClick={() => setIsPrioritiesOpen(!isPrioritiesOpen)}
-                className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-600 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
+                className="p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50 hover:shadow-neon-green"
                 aria-label="Menu"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
@@ -261,7 +262,7 @@ const Layout = () => {
 
           {/* Desktop: Colonne gauche - État des lieux (toujours visible) */}
           {!isMobile && (
-            <div className="w-1/3 lg:w-1/4 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="w-1/3 lg:w-1/4 border-r border-neon-green/20 bg-black">
               <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
                 <SidebarPriority onZoneSelect={() => setIsChatOpen(true)} />
               </Suspense>
@@ -280,22 +281,25 @@ const Layout = () => {
 
               {/* Drawer qui slide depuis la gauche */}
               <div
-                className="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-white dark:bg-gray-800 shadow-2xl z-[2001] transform transition-transform"
+                className="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-black border-r border-neon-green/30 shadow-neon-green-lg z-[2001] transform transition-transform"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header du drawer */}
-                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      État des lieux
+                <div className="flex items-center justify-between px-4 py-4 border-b border-neon-green/30 bg-black relative overflow-hidden">
+                  {/* Subtle grid pattern background */}
+                  <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+
+                  <div className="relative z-10">
+                    <h2 className="text-lg font-mono font-bold text-neon-green uppercase tracking-wider" style={{ textShadow: '0 0 10px rgba(0,255,0,0.5)' }}>
+                      • État des lieux
                     </h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <p className="text-xs text-neon-green/60 mt-0.5 font-mono uppercase">
                       Vue d'ensemble et priorités
                     </p>
                   </div>
                   <button
                     onClick={() => setIsPrioritiesOpen(false)}
-                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="relative z-10 p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50"
                     aria-label="Fermer"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,18 +324,16 @@ const Layout = () => {
               <MapView onZoneSelect={() => setIsChatOpen(true)} />
             </Suspense>
 
+
             {/* Bouton flottant pour ouvrir le chat (affiché seulement si le chat est fermé) */}
             {!isChatOpen && (
               <button
                 onClick={() => setIsChatOpen(true)}
-                className="group fixed md:absolute bottom-6 md:bottom-6 right-6 md:right-6 z-[1001] bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300 animate-pulse-slow"
+                className="group fixed md:absolute bottom-20 md:bottom-20 right-6 md:right-6 z-[1001] glass border-2 border-neon-green text-neon-green p-4 rounded-full shadow-neon-green-lg hover:shadow-neon-green transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-neon-green/50 animate-pulse-slow"
                 aria-label="Ouvrir le chat"
               >
-                {/* Effet de brillance pulsant */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-
                 {/* Cercle d'onde animé */}
-                <div className="absolute inset-0 rounded-full border-2 border-blue-400 animate-ping opacity-20" />
+                <div className="absolute inset-0 rounded-full border-2 border-neon-green animate-ping opacity-20" />
 
                 <svg className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

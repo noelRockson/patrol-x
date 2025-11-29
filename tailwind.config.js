@@ -9,6 +9,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'Courier New', 'monospace'],
       },
       colors: {
         primary: {
@@ -22,6 +23,15 @@ export default {
           700: '#1d4ed8',
           800: '#1e40af',
           900: '#1e3a8a',
+        },
+        neon: {
+          green: '#00ff00',
+          'green-light': '#00ff41',
+          'green-dark': '#00cc00',
+          cyan: '#00ffff',
+          pink: '#ff00ff',
+          orange: '#ff6600',
+          red: '#ff0000',
         },
       },
       animation: {
@@ -69,6 +79,10 @@ export default {
         'glow': '0 0 20px rgba(37, 99, 235, 0.3)',
         'glow-lg': '0 0 30px rgba(37, 99, 235, 0.4)',
         'inner-glow': 'inset 0 0 20px rgba(37, 99, 235, 0.2)',
+        'neon-green': '0 0 10px rgba(0, 255, 0, 0.5), 0 0 20px rgba(0, 255, 0, 0.3)',
+        'neon-green-lg': '0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4)',
+        'neon-pink': '0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3)',
+        'neon-orange': '0 0 10px rgba(255, 102, 0, 0.5), 0 0 20px rgba(255, 102, 0, 0.3)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

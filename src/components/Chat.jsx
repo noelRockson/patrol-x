@@ -439,38 +439,38 @@ const Chat = ({ onClose, isMobile }) => {
 
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+    <div className="flex flex-col h-full bg-black">
       {/* Header */}
-      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between shrink-0 bg-gradient-to-r from-white via-blue-50/30 to-white dark:from-gray-800 dark:via-blue-900/10 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden">
-        {/* Gradient animé subtil */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent animate-shimmer" style={{ animationDuration: '3s' }} />
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-neon-green/30 flex items-center justify-between shrink-0 bg-black relative overflow-hidden">
+        {/* Subtle grid pattern background */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
 
         <div className="flex-1 min-w-0 relative z-10">
           <div className="flex items-center gap-2">
-            <h2 className="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              Chat IA
+            <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse" title="En ligne" />
+            <h2 className="text-base md:text-lg font-mono font-bold text-neon-green uppercase tracking-wider" style={{ textShadow: '0 0 10px rgba(0,255,0,0.5)' }}>
+              • CHAT IA
             </h2>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="En ligne" />
           </div>
           {(selectedZone && selectedZone.length > 0) ? (
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+            <p className="text-xs md:text-sm text-neon-green/60 mt-0.5 truncate font-mono uppercase">
               {activeZone
-                ? `📍 Zone active : ${activeZone}`
+                ? `📍 Vue d'ensemble — ${activeZone}`
                 : selectedZone.length === 1
-                  ? `📍 Zone : ${selectedZone[0]}`
-                  : `📍 Zones (${selectedZone.length}) : ${selectedZone.join(', ')}`
+                  ? `📍 Vue d'ensemble — ${selectedZone[0]}`
+                  : `📍 ${selectedZone.length} zones sélectionnées`
               }
             </p>
           ) : (
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              🌍 Vue d'ensemble — Port-au-Prince
+            <p className="text-xs md:text-sm text-neon-green/60 mt-0.5 truncate font-mono uppercase">
+              📍 Vue d'ensemble — Port-au-Prince
             </p>
           )}
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="relative z-10 ml-3 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:scale-105 active:scale-95"
+            className="relative z-10 ml-3 p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50"
             aria-label="Fermer le chat"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +481,7 @@ const Chat = ({ onClose, isMobile }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 bg-black">
         {messages.map((msg, index) => (
           <ChatMessage
             key={`${msg.timestamp}-${index}`}
@@ -519,7 +519,7 @@ const Chat = ({ onClose, isMobile }) => {
       </div>
 
       {/* Input */}
-      <div className="px-4 md:px-6 py-3 md:py-4 border-t border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-800">
+      <div className="px-4 md:px-6 py-3 md:py-4 border-t border-neon-green/30 shrink-0 bg-black">
         <form onSubmit={handleSubmit}>
           <div className="flex gap-2">
             <input
@@ -528,18 +528,15 @@ const Chat = ({ onClose, isMobile }) => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={isOnline ? "Tapez votre question ou message..." : "Hors ligne..."}
               disabled={chatLoading || !isOnline}
-              className="flex-1 px-4 py-3 text-sm md:text-base border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="flex-1 px-4 py-3 text-sm md:text-base glass border-2 border-neon-green/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green/50 focus:border-neon-green disabled:bg-gray-800 disabled:cursor-not-allowed bg-black text-neon-green placeholder-neon-green/40 font-mono"
               aria-label="Message"
             />
             <button
               type="submit"
               disabled={!inputValue.trim() || chatLoading || !isOnline}
-              className="group relative px-5 py-3 text-sm md:text-base bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700 disabled:cursor-not-allowed disabled:shadow-none shrink-0 font-medium overflow-hidden"
+              className="group relative px-5 py-3 text-sm md:text-base bg-neon-green/10 border-2 border-neon-green hover:bg-neon-green/20 text-neon-green rounded-lg transition-all duration-300 hover:shadow-neon-green active:scale-95 focus:outline-none focus:ring-2 focus:ring-neon-green/50 disabled:bg-gray-800 disabled:border-gray-700 disabled:text-gray-600 disabled:cursor-not-allowed disabled:shadow-none shrink-0 font-mono font-bold uppercase tracking-wider overflow-hidden"
               aria-label="Envoyer le message"
             >
-              {/* Effet shimmer sur le bouton */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
-
               <span className="relative z-10 flex items-center gap-1">
                 {isMobile ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

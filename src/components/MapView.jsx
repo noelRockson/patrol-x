@@ -17,15 +17,15 @@
 // // // Composant pour contrôler les limites de la carte
 // // function MapBoundsController({ selectedZone, activeZone, isMobile }) {
 // //   const map = useMap()
-  
+
 // //   useEffect(() => {
 // //     // Définir les limites maximales (Haïti)
 // //     map.setMaxBounds(haitiBounds)
-    
+
 // //     // Empêcher le zoom trop loin
 // //     map.setMinZoom(minZoom)
 // //     map.setMaxZoom(maxZoom)
-    
+
 // //     // Recentrer si on sort des limites
 // //     map.on('drag', () => {
 // //       const currentBounds = map.getBounds()
@@ -33,7 +33,7 @@
 // //         map.fitBounds(haitiBounds)
 // //       }
 // //     })
-    
+
 // //     // Gérer le zoom sur la zone active, sinon la dernière zone sélectionnée
 // //     const zoneToZoom = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
 // //     if (zoneToZoom) {
@@ -53,29 +53,29 @@
 // //       })
 // //     }
 // //   }, [selectedZone, activeZone, map, isMobile])
-  
+
 // //   return null
 // // }
 
 // // // Composant pour forcer le rebond si l'utilisateur sort des limites
 // // function ForceBounds() {
 // //   const map = useMap()
-  
+
 // //   useEffect(() => {
 // //     const checkBounds = () => {
 // //       const currentCenter = map.getCenter()
 // //       const currentZoom = map.getZoom()
-      
+
 // //       // Vérifier si le centre est hors d'Haïti
 // //       if (currentCenter.lat < haitiBounds[0][0] || currentCenter.lat > haitiBounds[1][0] ||
 // //           currentCenter.lng < haitiBounds[0][1] || currentCenter.lng > haitiBounds[1][1]) {
-        
+
 // //         // Recentrer sur Haïti
 // //         map.flyTo(defaultCenter, Math.max(currentZoom, minZoom), {
 // //           duration: 1
 // //         })
 // //       }
-      
+
 // //       // Forcer le zoom dans les limites
 // //       if (currentZoom < minZoom) {
 // //         map.setZoom(minZoom)
@@ -83,7 +83,7 @@
 // //         map.setZoom(maxZoom)
 // //       }
 // //     }
-    
+
 // //     // Vérifier périodiquement et sur les événements de déplacement
 // //     map.on('moveend', checkBounds)
 // //     map.on('zoomend', () => {
@@ -93,16 +93,16 @@
 // //         map.invalidateSize()
 // //       }, 100)
 // //     })
-    
+
 // //     const interval = setInterval(checkBounds, 1000) // Vérifier toutes les secondes
-    
+
 // //     return () => {
 // //       map.off('moveend', checkBounds)
 // //       map.off('zoomend', checkBounds)
 // //       clearInterval(interval)
 // //     }
 // //   }, [map])
-  
+
 // //   return null
 // // }
 
@@ -207,17 +207,17 @@
 // //     const checkMobile = () => {
 // //       setIsMobile(window.innerWidth < 768)
 // //     }
-    
+
 // //     checkMobile()
 // //     window.addEventListener('resize', checkMobile)
-    
+
 // //     return () => window.removeEventListener('resize', checkMobile)
 // //   }, [])
 
 // //   const handleCommuneClick = async (communeName) => {
 // //     // Si la zone est déjà sélectionnée, charger ses données quand même
 // //     const isAlreadySelected = selectedZone && selectedZone.includes(communeName)
-    
+
 // //     if (!isAlreadySelected) {
 // //       // Ajouter la zone au tableau
 // //       setSelectedZone(communeName)
@@ -275,7 +275,7 @@
 // //             updateWhenZooming={true}
 // //             updateWhenIdle={true}
 // //           />
-          
+
 // //           {portAuPrinceCommunes.map(commune => (
 // //             <CommunePolygon 
 // //               key={commune.id}
@@ -286,7 +286,7 @@
 // //               isMobile={isMobile}
 // //             />
 // //           ))}
-          
+
 // //           {portAuPrinceCommunes.map(commune => (
 // //             <CommuneLabel 
 // //               key={commune.id}
@@ -294,7 +294,7 @@
 // //               isMobile={isMobile}
 // //             />
 // //           ))}
-          
+
 // //           <MapBoundsController selectedZone={selectedZone} activeZone={activeZone} isMobile={isMobile} />
 // //           <ForceBounds />
 // //         </MapContainer>
@@ -358,13 +358,13 @@
 
 // function MapBoundsController({ selectedZone, activeZone, isMobile }) {
 //   const map = useMap()
-  
+
 //   useEffect(() => {
 //     // Définir les limites maximales
 //     map.setMaxBounds(haitiBounds)
 //     map.setMinZoom(minZoom)
 //     map.setMaxZoom(maxZoom)
-    
+
 //     // Recentrer si on sort des limites
 //     map.on('drag', () => {
 //       const currentBounds = map.getBounds()
@@ -372,7 +372,7 @@
 //         map.fitBounds(haitiBounds)
 //       }
 //     })
-    
+
 //     // Gérer le zoom sur la zone active
 //     const zoneToZoom = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
 //     if (zoneToZoom) {
@@ -391,32 +391,32 @@
 //       })
 //     }
 //   }, [selectedZone, activeZone, map, isMobile])
-  
+
 //   return null
 // }
 
 // function ForceBounds() {
 //   const map = useMap()
-  
+
 //   useEffect(() => {
 //     const checkBounds = () => {
 //       const currentCenter = map.getCenter()
 //       const currentZoom = map.getZoom()
-      
+
 //       if (currentCenter.lat < haitiBounds[0][0] || currentCenter.lat > haitiBounds[1][0] ||
 //           currentCenter.lng < haitiBounds[0][1] || currentCenter.lng > haitiBounds[1][1]) {
 //         map.flyTo(defaultCenter, Math.max(currentZoom, minZoom), {
 //           duration: 1
 //         })
 //       }
-      
+
 //       if (currentZoom < minZoom) {
 //         map.setZoom(minZoom)
 //       } else if (currentZoom > maxZoom) {
 //         map.setZoom(maxZoom)
 //       }
 //     }
-    
+
 //     map.on('moveend', checkBounds)
 //     map.on('zoomend', () => {
 //       checkBounds()
@@ -424,16 +424,16 @@
 //         map.invalidateSize()
 //       }, 100)
 //     })
-    
+
 //     const interval = setInterval(checkBounds, 1000)
-    
+
 //     return () => {
 //       map.off('moveend', checkBounds)
 //       map.off('zoomend', checkBounds)
 //       clearInterval(interval)
 //     }
 //   }, [map])
-  
+
 //   return null
 // }
 
@@ -539,7 +539,7 @@
 //       position={commune.center} 
 //       // icon={customIcon}
 //       //Add a color on Marker
-      
+
 //       interactive={false}
 //     />
 //   )
@@ -562,7 +562,7 @@
 //     activeZone, 
 //     setActiveZone 
 //   } = useStore()
-  
+
 //   const [isMobile, setIsMobile] = useState(false)
 
 //   // Détection mobile
@@ -570,17 +570,17 @@
 //     const checkMobile = () => {
 //       setIsMobile(window.innerWidth < 768)
 //     }
-    
+
 //     checkMobile()
 //     window.addEventListener('resize', checkMobile)
-    
+
 //     return () => window.removeEventListener('resize', checkMobile)
 //   }, [])
 
 //   // Gestion du clic sur une commune
 //   const handleCommuneClickInternal = useCallback(async (communeName) => {
 //     const isAlreadySelected = selectedZone && selectedZone.includes(communeName)
-    
+
 //     if (!isAlreadySelected) {
 //       setSelectedZone(communeName)
 //     }
@@ -644,7 +644,7 @@
 //             updateWhenZooming={true}
 //             updateWhenIdle={true}
 //           />
-          
+
 //           {/* Polygones */}
 //           {portAuPrinceCommunes.map(commune => (
 //             <CommunePolygon 
@@ -656,7 +656,7 @@
 //               isMobile={isMobile}
 //             />
 //           ))}
-          
+
 //           {/* Labels */}
 //           {portAuPrinceCommunes.map(commune => (
 //             <CommuneLabel 
@@ -665,7 +665,7 @@
 //               isMobile={isMobile}
 //             />
 //           ))}
-          
+
 //           <MapBoundsController 
 //             selectedZone={selectedZone} 
 //             activeZone={activeZone} 
@@ -709,19 +709,19 @@ L.Icon.Default.mergeOptions({
 
 function MapBoundsController({ selectedZone, activeZone, isMobile }) {
   const map = useMap()
-  
+
   useEffect(() => {
     map.setMaxBounds(haitiBounds)
     map.setMinZoom(minZoom)
     map.setMaxZoom(maxZoom)
-    
+
     map.on('drag', () => {
       const currentBounds = map.getBounds()
       if (!currentBounds.intersects(haitiBounds)) {
         map.fitBounds(haitiBounds)
       }
     })
-    
+
     const zoneToZoom = activeZone || (selectedZone && selectedZone.length > 0 ? selectedZone[selectedZone.length - 1] : null)
     if (zoneToZoom) {
       const commune = portAuPrinceCommunes.find(c => c.name === zoneToZoom)
@@ -739,32 +739,32 @@ function MapBoundsController({ selectedZone, activeZone, isMobile }) {
       })
     }
   }, [selectedZone, activeZone, map, isMobile])
-  
+
   return null
 }
 
 function ForceBounds() {
   const map = useMap()
-  
+
   useEffect(() => {
     const checkBounds = () => {
       const currentCenter = map.getCenter()
       const currentZoom = map.getZoom()
-      
+
       if (currentCenter.lat < haitiBounds[0][0] || currentCenter.lat > haitiBounds[1][0] ||
-          currentCenter.lng < haitiBounds[0][1] || currentCenter.lng > haitiBounds[1][1]) {
+        currentCenter.lng < haitiBounds[0][1] || currentCenter.lng > haitiBounds[1][1]) {
         map.flyTo(defaultCenter, Math.max(currentZoom, minZoom), {
           duration: 1
         })
       }
-      
+
       if (currentZoom < minZoom) {
         map.setZoom(minZoom)
       } else if (currentZoom > maxZoom) {
         map.setZoom(maxZoom)
       }
     }
-    
+
     map.on('moveend', checkBounds)
     map.on('zoomend', () => {
       checkBounds()
@@ -772,16 +772,16 @@ function ForceBounds() {
         map.invalidateSize()
       }, 100)
     })
-    
+
     const interval = setInterval(checkBounds, 1000)
-    
+
     return () => {
       map.off('moveend', checkBounds)
       map.off('zoomend', checkBounds)
       clearInterval(interval)
     }
   }, [map])
-  
+
   return null
 }
 
@@ -841,9 +841,9 @@ const CommunePolygon = memo(({ commune, isSelected, isActive, onClick, isMobile 
       }}
       className={`commune-polygon commune-${commune.id} ${isActive ? 'selected-commune' : ''} ${isSelected ? 'selected-commune' : ''}`}
     >
-      <Tooltip 
-        permanent={false} 
-        direction="center" 
+      <Tooltip
+        permanent={false}
+        direction="center"
         className="commune-tooltip"
         opacity={1}
       >
@@ -881,8 +881,8 @@ const CommuneLabel = memo(({ commune, isMobile }) => {
   })
 
   return (
-    <Marker 
-      position={commune.center} 
+    <Marker
+      position={commune.center}
       interactive={false}
     />
   )
@@ -896,16 +896,16 @@ const CommuneLabel = memo(({ commune, isMobile }) => {
 CommuneLabel.displayName = 'CommuneLabel'
 
 const MapView = ({ onZoneSelect }) => {
-  const { 
-    selectedZone, 
-    setSelectedZone, 
-    setZoneData, 
-    setPriorities, 
-    setIsLoading, 
-    activeZone, 
-    setActiveZone 
+  const {
+    selectedZone,
+    setSelectedZone,
+    setZoneData,
+    setPriorities,
+    setIsLoading,
+    activeZone,
+    setActiveZone
   } = useStore()
-  
+
   const [isMobile, setIsMobile] = useState(false)
   const isLoadingRef = useRef(false) // Empêcher les appels multiples
 
@@ -913,10 +913,10 @@ const MapView = ({ onZoneSelect }) => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
+
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -929,9 +929,9 @@ const MapView = ({ onZoneSelect }) => {
     }
 
     console.log('🎯 Clic sur zone:', communeName)
-    
+
     const isAlreadySelected = selectedZone && selectedZone.includes(communeName)
-    
+
     if (!isAlreadySelected) {
       setSelectedZone(communeName)
     }
@@ -962,13 +962,13 @@ const MapView = ({ onZoneSelect }) => {
   }, [selectedZone, setSelectedZone, setIsLoading, setActiveZone, setZoneData, setPriorities, onZoneSelect])
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 z-[1000] px-3 md:px-6 py-3 md:py-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
-          Carte interactive
+    <div className="h-full bg-gray-900 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 z-[1000] px-3 md:px-6 py-3 md:py-4 bg-black/90 backdrop-blur-sm border-b border-neon-green/30">
+        <h2 className="text-base md:text-lg font-mono font-bold text-neon-green uppercase tracking-wider" style={{ textShadow: '0 0 10px rgba(0,255,0,0.5)' }}>
+          • CARTE INTERACTIVE
         </h2>
-        <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5 md:mt-1">
-          Port-au-Prince, Haïti
+        <p className="text-xs md:text-sm text-neon-green/60 mt-0.5 md:mt-1 font-mono uppercase">
+          Système Online | Port-au-Prince, HT
         </p>
       </div>
 
@@ -989,14 +989,14 @@ const MapView = ({ onZoneSelect }) => {
           bounceAtZoomLimits={true}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             updateWhenZooming={true}
             updateWhenIdle={true}
           />
-          
+
           {portAuPrinceCommunes.map(commune => (
-            <CommunePolygon 
+            <CommunePolygon
               key={commune.id}
               commune={commune}
               isSelected={selectedZone && selectedZone.includes(commune.name)}
@@ -1005,33 +1005,31 @@ const MapView = ({ onZoneSelect }) => {
               isMobile={isMobile}
             />
           ))}
-          
+
           {portAuPrinceCommunes.map(commune => (
-            <CommuneLabel 
+            <CommuneLabel
               key={`label-${commune.id}`}
               commune={commune}
               isMobile={isMobile}
             />
           ))}
-          
-          <MapBoundsController 
-            selectedZone={selectedZone} 
-            activeZone={activeZone} 
-            isMobile={isMobile} 
+
+          <MapBoundsController
+            selectedZone={selectedZone}
+            activeZone={activeZone}
+            isMobile={isMobile}
           />
           <ForceBounds />
         </MapContainer>
       </div>
 
-      <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 z-[1000] pointer-events-none">
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg px-3 md:px-4 py-1.5 md:py-2 border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
-          <p className="text-[10px] md:text-xs text-gray-600 dark:text-gray-300 text-center">
-            {isMobile ? 'Touchez' : 'Cliquez sur'} une commune pour voir l'état des lieux
+
+      <div className="absolute bottom-16 md:bottom-20 left-0 right-0 z-[1000] flex justify-center pointer-events-none">
+        <button className="max-w-2xl mx-4 glass border-2 border-neon-green rounded-lg px-4 md:px-6 py-3 md:py-4 shadow-neon-green-lg hover:shadow-neon-green hover:border-neon-green/80 transition-all duration-300 group pointer-events-auto">
+          <p className="text-xs md:text-sm text-neon-green text-center font-mono font-bold uppercase tracking-wider whitespace-nowrap">
+            Cliquer sur une zone pour analyse détaillée
           </p>
-          <p className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 text-center mt-1">
-            Zone limitée à Haïti
-          </p>
-        </div>
+        </button>
       </div>
     </div>
   )
