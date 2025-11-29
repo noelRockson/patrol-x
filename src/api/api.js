@@ -7,7 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 secondes de timeout
+  timeout: 30000, // 10 secondes de timeout
 })
 // Simuler les réponses en attendant le backend
 const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
