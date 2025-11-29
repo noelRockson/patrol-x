@@ -83,6 +83,21 @@
 // }))
 
 import { create } from 'zustand'
+import { SafeStorage } from '../utils/storage'
+
+// Initialize auth state from localStorage
+const getInitialAuthState = () => {
+  if (typeof window === 'undefined') {
+    return { isAuthenticated: false, user: null }
+  }
+  const savedUser = SafeStorage.get('auth_user', null)
+  return {
+    isAuthenticated: !!savedUser,
+    user: savedUser,
+  }
+}
+
+const initialAuth = getInitialAuthState()
 
 export const useStore = create((set) => ({
   // Zones sélectionnées (tableau de chaînes)
@@ -170,4 +185,22 @@ export const useStore = create((set) => ({
   // État de chargement spécifique au chat
   chatLoading: false,
   setChatLoading: (loading) => set({ chatLoading: loading }),
+
+  // État d'authentification
+  isAuthenticated: initialAuth.isAuthenticated,
+  user: initialAuth.user,
+  login: (userData) => {
+    SafeStorage.set('auth_user', userData)
+    set({ 
+      isAuthenticated: true, 
+      user: userData 
+    })
+  },
+  logout: () => {
+    SafeStorage.remove('auth_user')
+    set({ 
+      isAuthenticated: false, 
+      user: null 
+    })
+  },
 }))

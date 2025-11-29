@@ -1,6 +1,9 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useStore } from '../context/store'
 import Logo from './Logo'
+import NotificationButton from './NotificationButton'
 
 // Lazy loading des composants lourds
 const SidebarPriority = lazy(() => import('./SidebarPriority'))
@@ -139,6 +142,10 @@ const OfflineNotice = () => {
 }
 
 const Layout = () => {
+  const navigate = useNavigate()
+  const logout = useStore((state) => state.logout)
+  const user = useStore((state) => state.user)
+  
   // États locaux
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isPrioritiesOpen, setIsPrioritiesOpen] = useState(false)
@@ -204,7 +211,7 @@ const Layout = () => {
         {/* ==========================================
             HEADER avec logo et contrôles
             ========================================== */}
-        <div className="h-14 md:h-16 bg-black border-b border-neon-green/30 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-neon-green relative overflow-hidden">
+        <div className="h-14 md:h-16 bg-black border-b border-neon-green/30 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-neon-green relative z-[4000] overflow-visible">
           {/* Subtle grid pattern background */}
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
 
@@ -223,6 +230,9 @@ const Layout = () => {
 
           {/* Contrôles à droite */}
           <div className="flex items-center gap-2 relative z-10">
+            {/* Notification Button (only when logged in) */}
+            <NotificationButton />
+
             {/* Bouton toggle dark/light mode */}
             <button
               onClick={toggleDarkMode}
@@ -238,6 +248,21 @@ const Layout = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
+            </button>
+
+            {/* Logout Button */}
+            <button
+              onClick={() => {
+                logout()
+                navigate('/login')
+              }}
+              className="p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-neon-green/50 hover:shadow-neon-green"
+              aria-label="Déconnexion"
+              title={user ? `Déconnexion (${user.name || user.email})` : 'Déconnexion'}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
             </button>
 
             {/* Menu burger pour mobile uniquement */}
