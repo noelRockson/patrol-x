@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
-import { loginUser } from '../api/api'
+import { loginUser, getNotifications } from '../api/api'
 
 const Login = () => {
   const navigate = useNavigate()
   const login = useStore((state) => state.login)
+  const setNotifications = useStore((state) => state.setNotifications)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -53,12 +54,25 @@ const Login = () => {
       // Login user
       const response = await loginUser(formData.email, formData.password)
       console.log('response: ', response)
-      
+
       if (response && response.status === 'ok') {
         login({
           email: formData.email,
           name: formData.email.split('@')[0],
         })
+
+        // Récupérer automatiquement les notifications après connexion
+        try {
+          const notifResponse = await getNotifications()
+          if (notifResponse.status === 'ok') {
+            setNotifications(notifResponse.data)
+            console.log('🔔 Notifications chargées:', notifResponse.data)
+          }
+        } catch (notifError) {
+          console.warn('⚠️ Impossible de charger les notifications:', notifError)
+          // Ne pas bloquer la connexion si les notifications échouent
+        }
+
         setIsLoading(false)
         navigate('/')
       } else if (response && response.status === 'error') {
@@ -82,7 +96,7 @@ const Login = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-      
+
       {/* Glowing orbs */}
       <div className="absolute top-20 left-20 w-64 h-64 bg-neon-green/20 rounded-full blur-3xl animate-pulse-slow" />
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />

@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_BASE_URL = import.meta.env.VITE_API_URL + 'api' || 'http://localhost:3000/api'
+const API_BASE_URL = 'http://localhost:3000/api'
 const CTR_CENTER_ENDPOINT = import.meta.env.VITE_API_CTR_CENTER_URL_ENDPOINT
 
 const api = axios.create({
@@ -9,6 +9,34 @@ const api = axios.create({
   },
   timeout: 30000, // 10 secondes de timeout
 })
+
+// Intercepteur pour ajouter automatiquement le token JWT dans les requêtes
+api.interceptors.request.use(
+  (config) => {
+    // Vérifier si la requête est pour l'endpoint /notifications
+    const isNotificationsEndpoint = config.url && config.url.includes('/notifications')
+
+    if (isNotificationsEndpoint) {
+      // Récupérer le token du sessionStorage
+      const token = sessionStorage.getItem('token')
+
+      // Si un token existe, l'ajouter au header Authorization
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+        console.log(`🔐 [API] Token envoyé pour ${config.method.toUpperCase()} ${config.url}`)
+        console.log(`📝 [API] Authorization Header:`, config.headers.Authorization)
+      } else {
+        console.log(`⚠️ [API] Pas de token disponible pour ${config.method.toUpperCase()} ${config.url}`)
+      }
+    }
+
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
 // Simuler les réponses en attendant le backend
 const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -39,13 +67,13 @@ export const loginUser = async (username, password) => {
     }
   } catch (error) {
     console.error('Error logging in user:', error)
-    
+
     // Gérer les différents types d'erreurs
     if (error.response) {
       // Le serveur a répondu avec un code d'erreur
       const status = error.response.status
       const message = error.response.data?.message || error.response.data?.error || 'Erreur de connexion'
-      
+
       if (status === 401) {
         return {
           status: 'error',
@@ -73,6 +101,63 @@ export const loginUser = async (username, password) => {
       return {
         status: 'error',
         message: 'Erreur lors de la connexion. Veuillez réessayer.'
+      }
+    }
+  }
+}
+
+// Fonction pour récupérer les notifications
+export const getNotifications = async (unreadOnly = true, limit = 50) => {
+  try {
+    console.log('[API] Fetching notifications:', { unreadOnly, limit })
+
+    const response = await api.get('/notifications', {
+      params: {
+        unread_only: unreadOnly,
+        limit: limit
+      }
+    })
+
+    console.log('[API] Notifications received:', response.data)
+
+    return {
+      status: 'ok',
+      data: response.data
+    }
+  } catch (error) {
+    console.error('[API] Error fetching notifications:', error)
+
+    // Gestion des différents types d'erreurs
+    if (error.response) {
+      const status = error.response.status
+      const message = error.response.data?.message || error.response.data?.error || 'Erreur lors de la récupération des notifications'
+
+      if (status === 401) {
+        return {
+          status: 'error',
+          message: 'Non autorisé. Veuillez vous connecter.',
+          code: 'UNAUTHORIZED'
+        }
+      } else if (status === 404) {
+        return {
+          status: 'error',
+          message: 'Aucune notification trouvée'
+        }
+      } else {
+        return {
+          status: 'error',
+          message: message || 'Erreur lors de la récupération des notifications'
+        }
+      }
+    } else if (error.request) {
+      return {
+        status: 'error',
+        message: 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.'
+      }
+    } else {
+      return {
+        status: 'error',
+        message: 'Erreur lors de la récupération des notifications. Veuillez réessayer.'
       }
     }
   }
@@ -110,7 +195,7 @@ export const signupUser = async (username, email, password) => {
 
   try {
     console.log('Sending signup request with:', { username: username.trim(), email: email.trim().toLowerCase() })
-    const response = await api.post('/signup', { 
+    const response = await api.post('/signup', {
       username: username.trim(),
       email: email.trim().toLowerCase(),
       password: password
@@ -120,7 +205,7 @@ export const signupUser = async (username, email, password) => {
     if (response.data && response.data.token) {
       // Sauvegarde du token dans le sessionStorage
       sessionStorage.setItem('token', response.data.token)
-      
+
       // Journalisation (en mode développement uniquement)
       if (process.env.NODE_ENV === 'development') {
         console.log('[API] Inscription réussie pour:', email)
@@ -145,12 +230,12 @@ export const signupUser = async (username, email, password) => {
 
   } catch (error) {
     console.error('[API] Erreur lors de l\'inscription:', error)
-    
+
     // Gestion des erreurs spécifiques
     if (error.response) {
       // Erreur avec réponse du serveur
       const { status, data } = error.response
-      
+
       // Messages d'erreur personnalisés selon le code de statut
       const errorMessages = {
         400: data?.message || 'Données de formulaire invalides',

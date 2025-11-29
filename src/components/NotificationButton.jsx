@@ -1,15 +1,51 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useStore } from '../context/store'
+import { getNotifications } from '../api/api'
 
 const NotificationButton = () => {
   const isAuthenticated = useStore((state) => state.isAuthenticated)
+  const notifications = useStore((state) => state.notifications)
+  const unreadCount = useStore((state) => state.unreadNotificationsCount)
+  const setNotifications = useStore((state) => state.setNotifications)
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications] = useState([
-    { id: 1, message: 'Nouvelle alerte dans la zone 1', time: 'Il y a 5 min', read: false },
-    { id: 2, message: 'Mise à jour des priorités', time: 'Il y a 15 min', read: false },
-    { id: 3, message: 'Système opérationnel', time: 'Il y a 1h', read: true },
-  ])
+  const [selectedNotification, setSelectedNotification] = useState(null)
   const dropdownRef = useRef(null)
+
+  // Charger les notifications au montage uniquement si l'utilisateur est connecté
+  useEffect(() => {
+    // Ne charger les notifications que si l'utilisateur est authentifié
+    if (!isAuthenticated) {
+      return
+    }
+
+    // Ne charger les notifications que si elles n'ont pas encore été chargées
+    // On vérifie si le tableau est vide et qu'on n'a pas encore de count
+    const shouldLoad = notifications.length === 0 && unreadCount === 0
+    
+    if (shouldLoad) {
+      const loadNotifications = async () => {
+        try {
+          console.log('🔔 Chargement des notifications pour l\'utilisateur connecté...')
+          const response = await getNotifications()
+          
+          if (response && response.status === 'ok' && response.data) {
+            setNotifications(response.data)
+            console.log('🔔 Notifications chargées depuis NotificationButton:', response.data)
+          } else {
+            console.log('🔔 Aucune notification disponible - réponse:', response)
+            // Initialiser avec un tableau vide si aucune notification
+            setNotifications({ notifications: [], unread_count: 0 })
+          }
+        } catch (error) {
+          console.warn('⚠️ Impossible de charger les notifications:', error)
+          // En cas d'erreur, initialiser avec un tableau vide
+          setNotifications({ notifications: [], unread_count: 0 })
+        }
+      }
+      
+      loadNotifications()
+    }
+  }, [isAuthenticated, notifications.length, unreadCount, setNotifications])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -28,8 +64,40 @@ const NotificationButton = () => {
     }
   }, [isOpen])
 
-  // Count unread notifications
-  const unreadCount = notifications.filter(n => !n.read).length
+  // Helper function to format notification time
+  const formatNotificationTime = (createdAt) => {
+    if (!createdAt) return 'Récemment'
+    
+    const now = new Date()
+    const notificationDate = new Date(createdAt)
+    const diffInSeconds = Math.floor((now - notificationDate) / 1000)
+    
+    if (diffInSeconds < 60) {
+      return 'À l\'instant'
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60)
+      return `Il y a ${minutes} min`
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600)
+      return `Il y a ${hours}h`
+    } else {
+      const days = Math.floor(diffInSeconds / 86400)
+      return `Il y a ${days} jour${days > 1 ? 's' : ''}`
+    }
+  }
+
+  // Helper function to truncate text
+  const truncateText = (text, maxLength = 100) => {
+    if (!text) return ''
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
+  // Check if text should be clickable (long text)
+  const isTextLong = (text, maxLength = 100) => {
+    if (!text) return false
+    return text.length > maxLength
+  }
 
   if (!isAuthenticated) {
     return null
@@ -78,30 +146,49 @@ const NotificationButton = () => {
               </div>
             ) : (
               <div className="divide-y divide-neon-green/10">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`px-4 py-3 hover:bg-neon-green/5 transition-colors cursor-pointer ${
-                      !notification.read ? 'bg-neon-green/5' : ''
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                        !notification.read ? 'bg-neon-green animate-pulse' : 'bg-neon-green/30'
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${
-                          !notification.read ? 'text-neon-green font-semibold' : 'text-neon-green/70'
-                        }`}>
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-neon-green/50 mt-1 font-mono">
-                          {notification.time}
-                        </p>
+                {notifications.map((notification) => {
+                  const isUnread = !notification.read || notification.read === false
+                  const notificationMessage = notification.message || notification.content || notification.text || 'Notification'
+                  const notificationTime = notification.created_at || notification.createdAt || notification.time
+                  const isLong = isTextLong(notificationMessage)
+                  
+                  return (
+                    <div
+                      key={notification.id || notification._id || Math.random()}
+                      className={`px-4 py-3 hover:bg-neon-green/5 transition-colors ${
+                        isLong ? 'cursor-pointer' : ''
+                      } ${
+                        isUnread ? 'bg-neon-green/5' : ''
+                      }`}
+                      onClick={() => {
+                        if (isLong) {
+                          setSelectedNotification(notification)
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                          isUnread ? 'bg-neon-green animate-pulse' : 'bg-neon-green/30'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm ${
+                            isUnread ? 'text-neon-green font-semibold' : 'text-neon-green/70'
+                          }`}>
+                            {isLong ? truncateText(notificationMessage) : notificationMessage}
+                          </p>
+                          {isLong && (
+                            <p className="text-xs text-neon-green/60 mt-1 font-mono italic">
+                              Cliquer pour voir plus
+                            </p>
+                          )}
+                          <p className="text-xs text-neon-green/50 mt-1 font-mono">
+                            {formatNotificationTime(notificationTime)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -113,6 +200,64 @@ const NotificationButton = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal pour afficher la notification complète */}
+      {selectedNotification && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 z-[5000] animate-fadeIn"
+            onClick={() => setSelectedNotification(null)}
+          />
+          
+          {/* Modal */}
+          <div className="fixed inset-0 z-[5001] flex items-center justify-center p-4 pointer-events-none">
+            <div
+              className="glass-strong border-2 border-neon-green/30 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-neon-green-lg animate-scaleIn pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-neon-green/20">
+                <h3 className="text-lg font-bold text-neon-green font-mono uppercase tracking-wider">
+                  Notification
+                </h3>
+                <button
+                  onClick={() => setSelectedNotification(null)}
+                  className="p-2 text-neon-green/70 hover:text-neon-green hover:bg-neon-green/10 border border-transparent hover:border-neon-green/30 rounded-lg transition-all duration-300"
+                  aria-label="Fermer"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                    !selectedNotification.read || selectedNotification.read === false
+                      ? 'bg-neon-green animate-pulse' 
+                      : 'bg-neon-green/30'
+                  }`} />
+                  <div className="flex-1">
+                    <p className="text-neon-green/90 text-sm leading-relaxed whitespace-pre-wrap">
+                      {selectedNotification.message || selectedNotification.content || selectedNotification.text || 'Notification'}
+                    </p>
+                    <p className="text-xs text-neon-green/50 mt-3 font-mono">
+                      {formatNotificationTime(
+                        selectedNotification.created_at || 
+                        selectedNotification.createdAt || 
+                        selectedNotification.time
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

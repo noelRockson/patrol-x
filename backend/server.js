@@ -36,6 +36,21 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// Middleware pour extraire le token JWT du header Authorization
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    // Extraire le token (enlever "Bearer " du début)
+    const token = authHeader.substring(7)
+    req.token = token
+
+    console.log(`[backend] Token JWT détecté pour ${req.method} ${req.path}`)
+  }
+
+  next()
+})
+
 // Middleware de logging simple
 app.use((req, res, next) => {
   if (req.path === '/api/ask') {
@@ -53,10 +68,10 @@ app.get('/api/health', (req, res) => {
 app.post('/api/test', (req, res) => {
   console.log('[backend] ===== TEST POST =====')
   console.log('[backend] Body reçu:', req.body)
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     received: req.body,
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString()
   })
 })
 
@@ -69,14 +84,14 @@ app.get('/api/events/latest', async (req, res) => {
       error: 'API_CTR_CENTER_URL is not configured on the server',
     })
   }
-  console.log('url /api/events/latest: ',url)
+  console.log('url /api/events/latest: ', url)
 
   const now = Date.now()
   const isCacheFresh = eventsCache.data && now - eventsCache.lastFetchedAt < EVENTS_CACHE_TTL_MS
   const forceRefresh = req.query?.refresh === 'true'
 
   if (isCacheFresh && !forceRefresh) {
-    console.log('cache hit : ',x++)
+    console.log('cache hit : ', x++)
     return res.json(eventsCache.data)
   }
 
@@ -95,7 +110,7 @@ app.get('/api/events/latest', async (req, res) => {
       data: response.data,
       lastFetchedAt: now,
     }
-    console.log('cache miss : ',x++)
+    console.log('cache miss : ', x++)
     res.json(response.data)
   } catch (error) {
     console.error('[backend] Error fetching /events/latest from CTR Center:', error.message)
@@ -126,7 +141,7 @@ app.get('/api/zone/:name', async (req, res) => {
   }
 
   const now = Date.now()
-  
+
   try {
     if (!url) {
       throw new Error('API CTR Center URL is not properly configured')
@@ -162,7 +177,7 @@ app.get('/api/zone/:name', async (req, res) => {
     res.json(payload)
   } catch (error) {
     console.error('[backend] Error fetching /zone/:name from CTR Center:', error.message)
-    
+
     const status = error.response?.status || 500
     res.status(status).json({
       error: 'Failed to fetch zone data from CTR Center API',
@@ -174,9 +189,9 @@ app.get('/api/zone/:name', async (req, res) => {
 // POST /api/ask - Envoyer une question au chat
 app.post('/api/ask', async (req, res) => {
   const { prompt } = req.body
-  
+
   console.log('[backend] POST /api/ask - prompt reçu:', prompt)
-  
+
   // Validation
   if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     return res.status(400).json({
@@ -192,7 +207,7 @@ app.post('/api/ask', async (req, res) => {
 
   // Construire l'URL de l'API externe pour le chat
   const chatUrl = `${API_CTR_CENTER_URL}${API_CTR_CENTER_URL_CHAT_ENDPOINT}`
-  
+
   console.log('[backend] POST /api/ask - prompt:', prompt)
   console.log('[backend] Calling external API:', chatUrl)
 
@@ -210,7 +225,7 @@ app.post('/api/ask', async (req, res) => {
     console.log(response)
     // Normaliser la réponse pour le frontend
     const responseData = response.data.answer || {}
-    
+
     // S'assurer que la réponse a le format attendu
     const normalizedResponse = {
       response: responseData || responseData.message || responseData.text || 'Réponse reçue',
@@ -221,10 +236,10 @@ app.post('/api/ask', async (req, res) => {
     res.json(normalizedResponse)
   } catch (error) {
     console.error('[backend] Error calling chat API:', error.message)
-    
+
     const status = error.response?.status || 500
     const errorMessage = error.response?.data?.error || error.message || 'Failed to get response from chat API'
-    
+
     res.status(status).json({
       error: 'Failed to get response from chat API',
       details: errorMessage,
@@ -232,20 +247,62 @@ app.post('/api/ask', async (req, res) => {
   }
 })
 
+// GET /api/notifications - Récupérer les notifications de l'utilisateur
+app.get('/api/notifications', async (req, res) => {
+  if (!API_CTR_CENTER_URL) {
+    return res.status(500).json({
+      error: 'API_CTR_CENTER_URL is not configured on the server',
+    })
+  }
+
+  // Récupérer les query parameters (avec valeurs par défaut)
+  const unreadOnly = req.query.unread_only === 'true' || req.query.unread_only === true
+  const limit = parseInt(req.query.limit) || 50
+
+  // Construire l'URL avec les query parameters
+  const notificationsUrl = `${API_CTR_CENTER_URL}/notifications?unread_only=${unreadOnly}&limit=${limit}`
+
+  console.log('[backend] GET /api/notifications')
+  console.log('[backend] Calling:', notificationsUrl)
+
+  try {
+    // Récupérer le token du header Authorization si présent
+    const authHeader = req.headers.authorization
+    const headers = {
+      'Content-Type': 'application/json',
+      accept: 'application/json',
+    }
+
+    // Ajouter le token si présent
+    if (authHeader) {
+      headers.Authorization = authHeader
+      console.log('[backend] Forwarding Authorization header to CTR Center')
+    }
+
+    const response = await axios.get(notificationsUrl, { headers })
+
+    console.log('[backend] Notifications received:', response.data)
+    res.json(response.data)
+  } catch (error) {
+    console.error('[backend] Error fetching notifications:', error.message)
+    res.status(500).json({ error: 'Failed to fetch notifications from CTR Center API' })
+  }
+})
+
 // POST /api/login - Login user and save the token in the session
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body
-  
+
   // Vérification des champs obligatoires
   if (!username || !password) {
-    return res.status(400).json({ 
-      status: 'error', 
-      message: 'Username and password are required' 
+    return res.status(400).json({
+      status: 'error',
+      message: 'Username and password are required'
     })
   }
 
   const url = API_CTR_CENTER_URL + '/auth/signin'
-  
+
   try {
     const response = await axios.post(url, {
       username: username,
@@ -258,15 +315,15 @@ app.post('/api/login', async (req, res) => {
     })
 
     console.log('[backend] Login successful for user:', username)
-    res.json({ 
-      status: 'ok', 
-      message: 'Login successful', 
-      token: response.data.token 
+    res.json({
+      status: 'ok',
+      message: 'Login successful',
+      token: response.data.token
     })
 
   } catch (error) {
     console.error('[backend] Login error:', error.message)
-    
+
     // Gestion des erreurs spécifiques
     if (error.response) {
       // La requête a été faite et le serveur a répondu avec un code d'erreur
@@ -307,8 +364,8 @@ app.post('/api/signup', async (req, res) => {
   const userJsonString = JSON.stringify(userData)
 
   console.log('Auth URL:', url)
-  console.log('Attempting to create user:', { username, email ,password})
-  
+  console.log('Attempting to create user:', { username, email, password })
+
   try {
     const response = await axios.post(url, userJsonString, {
       headers: {
@@ -318,15 +375,15 @@ app.post('/api/signup', async (req, res) => {
     })
 
     console.log('[backend] Signup successful for user:', username)
-    res.json({ 
-      status: 'ok',     
-      message: 'Signup successful', 
-      token: response.data.token 
+    res.json({
+      status: 'ok',
+      message: 'Signup successful',
+      token: response.data.token
     })
 
   } catch (error) {
     console.error('[backend] Signup error:', error.message)
-    
+
     // Gestion des erreurs spécifiques
     if (error.response) {
       // La requête a été faite et le serveur a répondu avec un code d'erreur

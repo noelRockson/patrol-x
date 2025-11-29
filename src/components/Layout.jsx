@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
 import NotificationButton from './NotificationButton'
+import useSessionTimeout from '../hooks/useSessionTimeout'
 
 // Lazy loading des composants lourds
 const SidebarPriority = lazy(() => import('./SidebarPriority'))
@@ -145,11 +146,15 @@ const Layout = () => {
   const navigate = useNavigate()
   const logout = useStore((state) => state.logout)
   const user = useStore((state) => state.user)
+  const isAuthenticated = useStore((state) => state.isAuthenticated)
   
   // États locaux
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isPrioritiesOpen, setIsPrioritiesOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Gestion du timeout de session (5 minutes d'inactivité)
+  useSessionTimeout(5)
 
   // Initialiser le mode dark depuis SafeStorage (localStorage sécurisé)
   // Default to dark mode for neon theme
@@ -377,7 +382,10 @@ const Layout = () => {
             {isMobile && (
               <div
                 className="fixed inset-0 bg-black/50 z-[1999]"
-                onClick={() => setIsChatOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsChatOpen(false)
+                }}
                 aria-label="Fermer le chat"
               />
             )}

@@ -937,6 +937,7 @@ const MapView = ({ onZoneSelect }) => {
   }, [])
 
   const handleCommuneClick = useCallback(async (communeName) => {
+    // Empêcher les appels multiples simultanés
     if (isLoadingRef.current) {
       console.log('🚫 Appel ignoré - chargement en cours')
       return
@@ -950,10 +951,7 @@ const MapView = ({ onZoneSelect }) => {
       setSelectedZone(communeName)
     }
 
-    if (onZoneSelect) {
-      onZoneSelect()
-    }
-
+    // Définir la zone active et charger les données
     isLoadingRef.current = true
     setIsLoading(true)
     setActiveZone(communeName)
@@ -971,6 +969,11 @@ const MapView = ({ onZoneSelect }) => {
     } finally {
       setIsLoading(false)
       isLoadingRef.current = false
+    }
+
+    // Ouvrir le chat après avoir défini la zone active
+    if (onZoneSelect) {
+      onZoneSelect()
     }
   }, [selectedZone, setSelectedZone, setIsLoading, setActiveZone, setZoneData, setPriorities, onZoneSelect])
 
@@ -1113,13 +1116,6 @@ const MapView = ({ onZoneSelect }) => {
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
     </div>
   )
 }

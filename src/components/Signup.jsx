@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
-import { signupUser } from '../api/api'
+import { signupUser, getNotifications } from '../api/api'
 
 const Signup = () => {
   const navigate = useNavigate()
   const login = useStore((state) => state.login)
+  const setNotifications = useStore((state) => state.setNotifications)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -55,29 +56,42 @@ const Signup = () => {
         formData.email.trim().toLowerCase(),
         formData.password
       )
-      
+
       // Vérification de la réponse
       if (response && response.status === 'ok') {
         // Afficher un message de succès
-        setError({ type: 'success', message: 'Compte créé avec succès ! Redirection...' })
-        
-        // Redirection vers la page de connexion après un court délai
+        setError({ type: 'success', message: 'Compte créé avec succès ! Connexion...' })
+
+        // Connecter automatiquement l'utilisateur
+        login({
+          email: formData.email,
+          name: formData.name,
+        })
+
+        // Récupérer automatiquement les notifications
+        try {
+          const notifResponse = await getNotifications()
+          if (notifResponse.status === 'ok') {
+            setNotifications(notifResponse.data)
+            console.log('🔔 Notifications chargées:', notifResponse.data)
+          }
+        } catch (notifError) {
+          console.warn('⚠️ Impossible de charger les notifications:', notifError)
+          // Ne pas bloquer l'inscription si les notifications échouent
+        }
+
+        // Redirection vers la page d'accueil
         setTimeout(() => {
-          navigate('/login', { 
-            state: { 
-              registrationSuccess: true,
-              email: formData.email 
-            } 
-          })
+          navigate('/')
         }, 1500)
-        
+
         return
-      } 
-      
+      }
+
       // Gestion des erreurs spécifiques
       if (response && response.status === 'error') {
         let errorMessage = 'Erreur lors de la création du compte'
-        
+
         // Messages d'erreur personnalisés selon le code d'erreur
         if (response.code === 'EMAIL_EXISTS') {
           errorMessage = 'Un compte existe déjà avec cette adresse email'
@@ -88,22 +102,22 @@ const Signup = () => {
         } else if (response.message) {
           errorMessage = response.message
         }
-        
+
         setError({ type: 'error', message: errorMessage })
       } else {
         // Réponse inattendue
-        setError({ 
-          type: 'error', 
-          message: 'Réponse inattendue du serveur. Veuillez réessayer plus tard.' 
+        setError({
+          type: 'error',
+          message: 'Réponse inattendue du serveur. Veuillez réessayer plus tard.'
         })
       }
-      
-    } catch (error) {     
+
+    } catch (error) {
       // Erreur inattendue
       console.error('Erreur lors de la création de compte:', error)
-      setError({ 
-        type: 'error', 
-        message: 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.' 
+      setError({
+        type: 'error',
+        message: 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.'
       })
     } finally {
       setIsLoading(false)
@@ -114,7 +128,7 @@ const Signup = () => {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-      
+
       {/* Glowing orbs */}
       <div className="absolute top-20 left-20 w-64 h-64 bg-neon-green/20 rounded-full blur-3xl animate-pulse-slow" />
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
@@ -134,12 +148,11 @@ const Signup = () => {
 
           {/* Messages d'état */}
           {error && (
-            <div 
-              className={`mb-6 p-3 rounded-lg text-sm animate-fadeIn ${
-                (typeof error === 'object' ? error.type : 'error') === 'error' 
-                  ? 'bg-red-500/20 border border-red-500/50 text-red-400' 
+            <div
+              className={`mb-6 p-3 rounded-lg text-sm animate-fadeIn ${(typeof error === 'object' ? error.type : 'error') === 'error'
+                  ? 'bg-red-500/20 border border-red-500/50 text-red-400'
                   : 'bg-green-500/20 border border-green-500/50 text-green-400'
-              }`}
+                }`}
             >
               {typeof error === 'object' ? error.message : error}
             </div>

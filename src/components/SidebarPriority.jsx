@@ -42,32 +42,11 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
     }
   }, [isDisabled, setGeneralStatus, setPriorities, setIsLoading])
 
-  // Charger automatiquement les données quand activeZone change (après suppression d'une zone)
-  useEffect(() => {
-    // Si activeZone existe et qu'on a des zones sélectionnées, charger les données UNE FOIS
-    if (activeZone && selectedZone && selectedZone.length > 0 && selectedZone.includes(activeZone)) {
-      // Ouvrir le chat si disponible
-      if (onZoneSelect) {
-        onZoneSelect()
-      }
-
-      const loadZoneData = async () => {
-        setIsLoading(true)
-        try {
-          const response = await getZoneData(activeZone)
-          const data = response.data
-
-          setZoneData(data)
-          setPriorities(data.status)
-        } catch (error) {
-          console.error('Error fetching zone data:', error)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-      loadZoneData()
-    }
-  }, [activeZone, selectedZone, setZoneData, setPriorities, setIsLoading, onZoneSelect])
+  // Note: Ce useEffect a été désactivé pour éviter les doubles appels
+  // Les données sont chargées directement depuis MapView ou handleLoadZoneData
+  // useEffect(() => {
+  //   // Ne plus charger automatiquement ici pour éviter les doubles appels
+  // }, [activeZone, selectedZone, zoneData])
 
   // Fonction pour charger les données d'une zone spécifique
   const handleLoadZoneData = async (zoneName) => {

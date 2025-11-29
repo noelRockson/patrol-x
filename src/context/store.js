@@ -108,7 +108,7 @@ export const useStore = create((set) => ({
       return state
     }
     // Ajouter la zone au tableau et la définir comme zone active
-    return { 
+    return {
       selectedZone: [...state.selectedZone, zone],
       activeZone: zone
     }
@@ -117,7 +117,7 @@ export const useStore = create((set) => ({
     const newZones = state.selectedZone.filter(z => z !== zone)
     // Si c'est la dernière zone, réinitialiser les priorités et données
     if (newZones.length === 0) {
-      return { 
+      return {
         selectedZone: [],
         activeZone: null,
         priorities: { urgent: 0, pertinent: 0, ignored: 0 },
@@ -131,12 +131,12 @@ export const useStore = create((set) => ({
     } else if (state.activeZone === zone) {
       newActiveZone = null
     }
-    return { 
+    return {
       selectedZone: newZones,
       activeZone: newActiveZone
     }
   }),
-  clearSelectedZones: () => set({ 
+  clearSelectedZones: () => set({
     selectedZone: [],
     activeZone: null,
     priorities: { urgent: 0, pertinent: 0, ignored: 0 },
@@ -151,7 +151,7 @@ export const useStore = create((set) => ({
 
   // Données de la zone
   zoneData: null,
-  setZoneData: (data) => set({ 
+  setZoneData: (data) => set({
     // CORRECTION: Créer un nouvel objet avec timestamp pour forcer la détection de changement
     zoneData: data ? {
       ...data,
@@ -184,6 +184,25 @@ export const useStore = create((set) => ({
 
   // État de chargement spécifique au chat
   chatLoading: false,
+
+  // Notifications
+  notifications: [],
+  unreadNotificationsCount: 0,
+  setNotifications: (data) => {
+    // Gérer la structure de réponse de l'API : {notifications: Array, status: 'ok', unread_count: number}
+    console.log('🔔 [Store] setNotifications called with:', data)
+    
+    const notifications = data?.notifications || (Array.isArray(data) ? data : [])
+    const unreadCount = data?.unread_count !== undefined ? data.unread_count : notifications.filter(n => !n.read || n.read === false).length
+    
+    console.log('🔔 [Store] Setting notifications:', { notifications, unreadCount })
+    
+    set({
+      notifications,
+      unreadNotificationsCount: unreadCount
+    })
+  },
+  clearNotifications: () => set({ notifications: [], unreadNotificationsCount: 0 }),
   setChatLoading: (loading) => set({ chatLoading: loading }),
 
   // État d'authentification
@@ -191,16 +210,23 @@ export const useStore = create((set) => ({
   user: initialAuth.user,
   login: (userData) => {
     SafeStorage.set('auth_user', userData)
-    set({ 
-      isAuthenticated: true, 
-      user: userData 
+    set({
+      isAuthenticated: true,
+      user: userData
     })
   },
   logout: () => {
     SafeStorage.remove('auth_user')
-    set({ 
-      isAuthenticated: false, 
-      user: null 
+    sessionStorage.removeItem('token')
+    set({
+      isAuthenticated: false,
+      user: null,
+      notifications: [],
+      unreadNotificationsCount: 0,
+      messages: [],
+      selectedZone: [],
+      activeZone: null,
+      zoneData: null
     })
   },
 }))
