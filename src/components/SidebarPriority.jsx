@@ -84,7 +84,7 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
     },
     {
       icon: 'Pin',
-      label: 'Pertinent',
+      label: 'IMPORTANTS',
       count: priorities.pertinent,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
@@ -93,7 +93,7 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
     },
     {
       icon: 'Moon',
-      label: 'Ignoré',
+      label: 'NON PRIORITAIRES',
       count: priorities.ignored,
       color: 'text-gray-600',
       bgColor: 'bg-gray-50',
@@ -340,7 +340,7 @@ const SidebarPriority = ({ isMobile = false, onZoneSelect }) => {
                 <h4 className="text-sm font-bold text-emerald-700 dark:text-neon-green mb-3 uppercase tracking-wider font-mono">
                   •• DÉTAILS PAR ZONE
                 </h4>
-                <div className="space-y-2 max-h-[390px] overflow-y-auto">
+                <div className="space-y-2 max-h-[370px] overflow-y-auto">
                   {generalStatus.zones
                     .sort((a, b) => (b.urgent + b.pertinent) - (a.urgent + a.pertinent)) // Trier par nombre d'incidents
                     .map((zone, index) => (

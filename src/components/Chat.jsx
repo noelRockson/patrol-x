@@ -108,14 +108,6 @@ const Chat = ({ onClose, isMobile }) => {
   useEffect(() => {
     if (!activeZone && selectedZone && selectedZone.length === 0) {
       lastDisplayedZoneRef.current = null // Reset le ref
-      if (messages.length === 0) {
-        addMessage({
-          text: 'Sélectionnez une zone sur la carte pour voir son état des lieux.',
-          isUser: false,
-          timestamp: Date.now(),
-          isAIResponse: false, // Message système, pas de typing
-        })
-      }
     }
   }, [activeZone, selectedZone?.length, addMessage, messages.length])
 

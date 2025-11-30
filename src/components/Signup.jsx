@@ -134,7 +134,7 @@ const Signup = () => {
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyan-200/30 dark:bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="glass-strong border-2 border-emerald-200 dark:border-neon-green/30 rounded-2xl p-8 shadow-xl dark:shadow-neon-green-lg animate-scaleIn bg-white/90 dark:bg-gray-900/90">
+        <div className="border-2 border-emerald-200 dark:border-neon-green/30 rounded-2xl p-8 shadow-xl dark:shadow-neon-green-lg animate-scaleIn bg-emerald-50 dark:bg-gray-900/90">
           {/* Logo and Title */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-4">
@@ -143,15 +143,15 @@ const Signup = () => {
             <h1 className="text-3xl font-bold text-emerald-700 dark:text-neon-green uppercase tracking-wider mb-2 dark:[text-shadow:0_0_10px_rgba(0,255,0,0.5)]">
               Patrol-X
             </h1>
-            <p className="text-emerald-600/70 dark:text-neon-green/70 text-sm font-mono uppercase">Créer un compte</p>
+            <p className="text-emerald-600 dark:text-neon-green/70 text-sm font-mono uppercase">Créer un compte</p>
           </div>
 
           {/* Messages d'état */}
           {error && (
             <div
               className={`mb-6 p-3 rounded-lg text-sm animate-fadeIn ${(typeof error === 'object' ? error.type : 'error') === 'error'
-                  ? 'bg-red-500/20 border border-red-500/50 text-red-400'
-                  : 'bg-green-500/20 border border-green-500/50 text-green-400'
+                  ? 'bg-white dark:bg-red-500/20 border border-red-300 dark:border-red-500/50 text-red-700 dark:text-red-400'
+                  : 'bg-white dark:bg-green-500/20 border border-green-300 dark:border-green-500/50 text-green-700 dark:text-green-400'
                 }`}
             >
               {typeof error === 'object' ? error.message : error}
@@ -161,7 +161,7 @@ const Signup = () => {
           {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-emerald-700/80 dark:text-neon-green/80 mb-2 font-mono uppercase">
+              <label htmlFor="name" className="block text-sm font-medium text-emerald-700 dark:text-neon-green/80 mb-2 font-mono uppercase">
                 Nom
               </label>
               <input
@@ -170,14 +170,14 @@ const Signup = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-black/50 border border-emerald-200 dark:border-neon-green/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-black/50 border border-emerald-300 dark:border-neon-green/30 rounded-lg text-emerald-800 dark:text-white placeholder-emerald-400/60 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
                 placeholder="Votre nom"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-emerald-700/80 dark:text-neon-green/80 mb-2 font-mono uppercase">
+              <label htmlFor="email" className="block text-sm font-medium text-emerald-700 dark:text-neon-green/80 mb-2 font-mono uppercase">
                 Email
               </label>
               <input
@@ -186,14 +186,14 @@ const Signup = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-black/50 border border-emerald-200 dark:border-neon-green/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-black/50 border border-emerald-300 dark:border-neon-green/30 rounded-lg text-emerald-800 dark:text-white placeholder-emerald-400/60 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
                 placeholder="votre@email.com"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-emerald-700/80 dark:text-neon-green/80 mb-2 font-mono uppercase">
+              <label htmlFor="password" className="block text-sm font-medium text-emerald-700 dark:text-neon-green/80 mb-2 font-mono uppercase">
                 Mot de passe
               </label>
               <input
@@ -202,14 +202,14 @@ const Signup = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-black/50 border border-emerald-200 dark:border-neon-green/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-black/50 border border-emerald-300 dark:border-neon-green/30 rounded-lg text-emerald-800 dark:text-white placeholder-emerald-400/60 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-emerald-700/80 dark:text-neon-green/80 mb-2 font-mono uppercase">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-emerald-700 dark:text-neon-green/80 mb-2 font-mono uppercase">
                 Confirmer le mot de passe
               </label>
               <input
@@ -218,7 +218,7 @@ const Signup = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-black/50 border border-emerald-200 dark:border-neon-green/30 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-black/50 border border-emerald-300 dark:border-neon-green/30 rounded-lg text-emerald-800 dark:text-white placeholder-emerald-400/60 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-neon-green focus:shadow-md dark:focus:shadow-neon-green transition-all duration-300"
                 placeholder="••••••••"
                 required
               />
@@ -242,11 +242,11 @@ const Signup = () => {
 
           {/* Login link */}
           <div className="mt-6 text-center">
-            <p className="text-emerald-600/70 dark:text-neon-green/60 text-sm">
+            <p className="text-emerald-600 dark:text-neon-green/60 text-sm">
               Déjà un compte ?{' '}
               <Link
                 to="/login"
-                className="text-emerald-600 dark:text-neon-green hover:text-emerald-700 dark:hover:text-neon-green-light font-semibold underline underline-offset-2 transition-colors"
+                className="text-emerald-700 dark:text-neon-green hover:text-emerald-800 dark:hover:text-neon-green-light font-semibold underline underline-offset-2 transition-colors"
               >
                 Se connecter
               </Link>

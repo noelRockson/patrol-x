@@ -387,12 +387,12 @@ const MapView = ({ onZoneSelect }) => {
         <div className="absolute bottom-8 md:bottom-10 left-0 right-0 z-[1000] flex justify-center pointer-events-none">
           <div className="relative group pointer-events-auto">
             {/* Button compact */}
-            <button className="relative mx-4 glass border-2 border-emerald-400 dark:border-neon-green/40 rounded-lg px-3 md:px-4 py-2 md:py-2.5 shadow-md dark:shadow-neon-green hover:border-emerald-500 dark:hover:border-neon-green/60 transition-all duration-300">
+            <button className="relative mx-4 bg-emerald-50 dark:bg-gray-900/80 border-2 border-emerald-400 dark:border-neon-green/40 rounded-lg px-3 md:px-4 py-2 md:py-2.5 shadow-md dark:shadow-neon-green hover:border-emerald-500 dark:hover:border-neon-green/60 transition-all duration-300">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-emerald-600 dark:text-neon-green/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                 </svg>
-                <p className="text-xs md:text-sm text-emerald-600 dark:text-neon-green/80 font-mono uppercase tracking-wider whitespace-nowrap">
+                <p className="text-xs md:text-sm text-emerald-600 font-bold dark:text-neon-green/80 font-mono uppercase tracking-wider whitespace-nowrap">
                   Cliquez sur une zone
                 </p>
               </div>
