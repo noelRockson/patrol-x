@@ -1,134 +1,277 @@
-# Patrol-X - Système de Surveillance en Temps Réel
+# Patrol-X
 
-<div align="center">
+> **Transforming chaotic public messages into clear, structured AI-generated alerts for Haiti**
 
-![Patrol-X Logo](public/assets/logo.svg)
-
-**Système de surveillance et d'analyse en temps réel pour Port-au-Prince, Haïti**
-
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.0.8-646CFF?logo=vite)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3.6-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/Zustand-4.4.7-FF6B6B)](https://zustand-demo.pmnd.rs/)
+[![Flask](https://img.shields.io/badge/Flask-3.1.2-000000?logo=flask)](https://flask.palletsprojects.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)](https://www.mongodb.com/)
 
-[Documentation](#-documentation) • [Installation](#-installation) • [Architecture](#-architecture) • [API](#-api)
-
-</div>
+**Patrol-X** is an intelligent real-time information analysis system that transforms chaotic public messages from WhatsApp, Telegram, and social media into clear, structured AI-generated alerts to help Haitians understand what is happening, where, and how serious it is—instantly.
 
 ---
 
-## Table des matières
+## Table of Contents
 
-- [Vue d'ensemble](#-vue-densemble)
-- [Fonctionnalités](#-fonctionnalités)
-- [Installation](#-installation)
-- [Démarrage](#-démarrage)
+- [Overview](#-overview)
 - [Architecture](#-architecture)
-- [Technologies](#-technologies)
-- [Documentation](#-documentation)
-- [Structure du projet](#-structure-du-projet)
+- [Project Structure](#-project-structure)
+- [Components](#-components)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
 - [Configuration](#-configuration)
-- [Développement](#-développement)
-- [Déploiement](#-déploiement)
+- [API Documentation](#-api-documentation)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
-## Vue d'ensemble
+## Overview
 
-**Patrol-X** est une application web moderne de surveillance et d'analyse en temps réel conçue pour surveiller les zones de Port-au-Prince, Haïti. L'application offre une interface intuitive avec cartographie interactive, chat IA, système de notifications et gestion des priorités d'incidents.
+Patrol-X is a comprehensive system that:
 
-### Caractéristiques principales
+- **Collects** content from multiple sources (WhatsApp, Telegram, Twitter, RSS)
+- **Filters** relevance using Grok AI (xAI)
+- **Analyzes** and extracts structured events
+- **Summarizes** key points with actionable recommendations
+- **Notifies** users about critical events automatically
+- **Answers** questions through an AI chat assistant
+- **Visualizes** events on an interactive map
+- **Helps** users make informed and rapid decisions
 
-- **Cartographie interactive** avec React Leaflet
-- **Chat IA conversationnel** pour l'analyse de données
-- **Système de notifications** en temps réel
-- **Authentification sécurisée** avec JWT
-- **Tableau de bord** avec priorités dynamiques
-- **Mode clair/sombre** adaptatif
-- **Design responsive** mobile-first
-- **Performance optimisée** avec lazy loading
+### Key Features
 
----
-
-## Fonctionnalités
-
-### Cartographie
-
-- **7 communes de Port-au-Prince** avec polygones colorés
-- **Sélection interactive** des zones par clic
-- **Zoom automatique** sur la zone sélectionnée
-- **Labels dynamiques** avec informations démographiques
-- **Limites géographiques** strictes (Haïti uniquement)
-- **Animations fluides** et effets visuels
-
-### Chat IA
-
-- **Assistant IA** pour l'analyse de données
-- **Messages contextuels** basés sur la zone sélectionnée
-- **Typing effect** pour une expérience naturelle
-- **Support Markdown** pour le formatage
-- **Historique des conversations**
-- **Mode hors ligne** avec indication visuelle
-
-### Notifications
-
-- **Notifications en temps réel** avec badge de compteur
-- **Messages longs** avec modal de lecture
-- **Marquage lu/non lu** automatique
-- **Filtrage par statut** (toutes/non lues)
-- **Horodatage relatif** (il y a X min/h/jour)
-
-### 🔐 Authentification
-
-- **Connexion** avec email/mot de passe
-- **Inscription** avec validation frontend
-- **Session timeout** (5 minutes d'inactivité)
-- **Protection des routes** avec React Router
-- **Stockage sécurisé** avec SafeStorage
-
-### Tableau de bord
-
-- **Priorités dynamiques** : Urgent, Pertinent, Ignoré
-- **État général** de toutes les zones
-- **Vue détaillée** par zone sélectionnée
-- **Statistiques en temps réel**
-- **Mise à jour automatique** toutes les 5 secondes
-
-### Interface utilisateur
-
-- **Thème néon** avec effets lumineux
-- **Mode clair/sombre** avec détection système
-- **Animations fluides** avec Framer Motion
-- **Design glassmorphism** moderne
-- **Responsive design** mobile/tablette/desktop
+- **AI-Powered Analysis**: Uses Grok AI for intelligent message processing and event extraction
+- **Interactive Map**: Real-time visualization of events across Port-au-Prince communes
+- **AI Chat Assistant**: Natural language queries about current events
+- **Real-time Notifications**: Automatic alerts for critical and high-severity events
+- **Secure Authentication**: JWT-based user authentication and session management
+- **Responsive Web App**: Modern, mobile-first interface with dark/light themes
+- **Multi-language Support**: Haitian Creole, French, and English
 
 ---
 
-## Installation
+## Architecture
 
-### Prérequis
-
-- **Node.js** >= 18.0.0
-- **npm** >= 9.0.0 ou **yarn** >= 1.22.0
-
-### Étapes d'installation
-
-1. **Cloner le repository**
-
-```bash
-git clone https://github.com/noelRockson/patrol-x.git
-cd patrol-x
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Data Collection Layer                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │   WhatsApp   │  │  Telegram    │  │ Social Media │       │
+│  │   Scraper    │  │   Scraper    │  │   Scraper    │       │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘       │
+└─────────┼──────────────────┼──────────────────┼──────────────┘
+          │                  │                  │
+          └──────────────────┴──────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Backend API    │
+                    │   (Flask/Python)│
+                    │                 │
+                    │  ┌──────────┐  │
+                    │  │ Grok AI  │  │
+                    │  │ Analysis │  │
+                    │  └──────────┘  │
+                    │                 │
+                    │  ┌──────────┐  │
+                    │  │ MongoDB  │  │
+                    │  │  Atlas   │  │
+                    │  └──────────┘  │
+                    └────────┬───────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+    ┌─────▼──────┐    ┌──────▼──────┐   ┌──────▼──────┐
+    │  Web App   │    │  Mobile App │   │  API Users  │
+    │  (React)   │    │  (Future)   │   │  (External) │
+    └────────────┘    └─────────────┘   └─────────────┘
 ```
 
-2. **Installer les dépendances**
+### Data Flow
 
-```bash
-npm install
+1. **Ingestion**: Raw messages received via `POST /messages` or collected by scrapers
+2. **Preprocessing**: Filter, normalize, extract hints using Grok AI
+3. **Analysis**: Generate structured events using Grok AI
+4. **Storage**: Save events to MongoDB production database
+5. **Notification**: Automatically create notifications for critical/high severity events
+6. **Query**: Retrieve and summarize by location or query type
+7. **Chat**: Answer questions using RAG (Retrieval-Augmented Generation) with Grok AI
+8. **Visualization**: Display events on interactive map in web application
+
+---
+
+## Project Structure
+
+```
+PatrolX/
+├── PatrolX/                    # Backend API (Flask/Python)
+│   ├── api/                    # API application
+│   │   ├── app.py             # Flask application entry point
+│   │   ├── auth.py            # Authentication logic (JWT, bcrypt)
+│   │   ├── services.py        # AI services (Grok AI integration)
+│   │   ├── utils.py           # Utility functions
+│   │   ├── db/                # Database models
+│   │   │   └── models.py      # MongoDB models and queries
+│   │   └── prompts/           # AI prompts
+│   │       └── system/        # System prompts for Grok AI
+│   ├── docs/                   # API documentation
+│   ├── requirements.txt        # Python dependencies
+│   ├── vercel.json            # Vercel deployment config
+│   └── README.md              # Backend documentation
+│
+├── Web App/                    # Frontend (React/Vite)
+│   ├── src/                   # Source code
+│   │   ├── components/        # React components
+│   │   ├── context/           # State management (Zustand)
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── utils/             # Utility functions
+│   │   └── api/               # API client
+│   ├── backend/               # Express proxy server
+│   ├── public/                # Static assets
+│   ├── package.json           # Node.js dependencies
+│   ├── vite.config.js         # Vite configuration
+│   └── README.md              # Frontend documentation
+│
+├── data_colector/             # Data collection scripts
+│   ├── extract_channel_messages.py  # WhatsApp channel scraper
+│   ├── send_messages_batch.py      # Batch message sender
+│   └── readme.md                    # Data collector documentation
+│
+└── README.md                  # This file (root documentation)
 ```
 
-3. **Configurer les variables d'environnement**
+---
 
-Créer un fichier `.env` à la racine du projet :
+## Components
+
+### 1. Backend API (`PatrolX/`)
+
+Flask-based REST API that handles:
+- Message ingestion and processing
+- AI-powered event extraction using Grok AI
+- User authentication and authorization
+- Event storage and retrieval
+- Notification management
+- AI chat assistant
+
+**Tech Stack:**
+- Python 3.8+
+- Flask 3.1.2
+- MongoDB Atlas
+- Grok AI (xAI)
+- JWT authentication
+
+**See**: [PatrolX/README.md](./PatrolX/README.md) for detailed documentation
+
+### 2. Web Application (`Web App/`)
+
+Modern React-based web application featuring:
+- Interactive map with Leaflet
+- Real-time event visualization
+- AI chat interface
+- Notification system
+- User authentication
+- Responsive design
+
+**Tech Stack:**
+- React 18.2.0
+- Vite 5.0.8
+- TailwindCSS 3.3.6
+- React Leaflet 4.2.1
+- Zustand 4.4.7
+
+**See**: [Web App/README.md](./Web%20App/README.md) for detailed documentation
+
+### 3. Data Collector (`data_colector/`)
+
+Python scripts for collecting messages from various sources:
+- WhatsApp channel scraper (Selenium)
+- Batch message sender to API
+- Message format conversion
+
+**Tech Stack:**
+- Python 3.8+
+- Selenium
+- Firefox/Geckodriver
+
+**See**: [data_colector/readme.md](./data_colector/readme.md) for detailed documentation
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Python 3.8+** (for backend)
+- **Node.js 18+** (for frontend)
+- **MongoDB Atlas** account
+- **Grok AI API key** from [xAI Console](https://console.x.ai/)
+- **Firefox** and **Geckodriver** (for data collector)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd PatrolX
+   ```
+
+2. **Set up Backend API**
+   ```bash
+   cd PatrolX
+   python -m venv env
+   source env/bin/activate  # On Windows: env\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Set up Web Application**
+   ```bash
+   cd "Web App"
+   npm install
+   ```
+
+4. **Configure environment variables** (see [Configuration](#-configuration))
+
+5. **Run the services**
+   ```bash
+   # Terminal 1: Backend API
+   cd PatrolX/api
+   python app.py
+
+   # Terminal 2: Web App
+   cd "Web App"
+   npm run dev
+   ```
+
+---
+
+## Configuration
+
+### Backend Environment Variables
+
+Create a `.env` file in `PatrolX/` or set environment variables:
+
+```bash
+# Grok AI (xAI) Configuration
+export GROK_TOKEN=your_grok_api_key_from_xai_console
+
+# MongoDB Configuration
+export DB_USERNAME=your_mongodb_username
+export DB_PASSWORD=your_mongodb_password
+
+# JWT Secret (for authentication)
+export JWT_SECRET=your_secure_random_secret_key
+```
+
+**Generate JWT_SECRET:**
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(64))"
+```
+
+### Frontend Environment Variables
+
+Create a `.env` file in `Web App/`:
 
 ```env
 # API Configuration
@@ -137,314 +280,301 @@ VITE_API_CTR_CENTER_URL=https://px-rho.vercel.app
 VITE_API_CTR_CENTER_URL_ENDPOINT=/api/events/latest
 VITE_API_CTR_CENTER_URL_LOCATION_ENDPOINT=/api/zone
 VITE_API_CTR_CENTER_URL_CHAT_ENDPOINT=/chat
-
-# Backend Configuration (optionnel)
-PORT=3000
-EVENTS_CACHE_TTL_MS=5000
 ```
 
-4. **Démarrer le serveur de développement**
+### Database Configuration
 
+- **Cluster**: `px-prod.amaelqi.mongodb.net`
+- **Database**: `production`
+- **Collections**: `events`, `processed_messages`, `users`, `sessions`, `notifications`
+
+---
+
+## 📚 API Documentation
+
+### Quick Reference
+
+#### Authentication
+- `POST /auth/signup` - Create new user account
+- `POST /auth/signin` - Sign in and get JWT token
+- `GET /auth/me` - Get current user info
+- `POST /auth/logout` - Logout and invalidate session
+
+#### Events
+- `POST /messages` - Process and analyze messages
+- `GET /events/latest` - Get latest events
+- `GET /events/location/<location>` - Get events by location
+
+#### Chat
+- `POST /chat` - Chat with AI assistant
+
+#### Notifications
+- `GET /notifications` - Get user notifications
+- `POST /notifications/<id>/read` - Mark notification as read
+- `POST /notifications/read-all` - Mark all as read
+- `DELETE /notifications/<id>` - Delete notification
+
+**Full Documentation:**
+- [API Documentation](./PatrolX/docs/API_DOCUMENTATION.md)
+- [API Quick Reference](./PatrolX/docs/API_QUICK_REFERENCE.md)
+- [Postman Collection](./PatrolX/docs/PatrolX_API.postman_collection.json)
+
+---
+
+## AI Models
+
+**Grok AI (xAI)** - All AI operations powered by Grok:
+- **`grok-4-1-fast-reasoning`**: Deep analysis and event extraction
+- **`grok-4-fast-reasoning`**: Preprocessing, chat, and summarization
+- **Embeddings API**: For semantic search and RAG (Retrieval-Augmented Generation)
+
+**API Endpoint**: `https://api.x.ai/v1`
+
+Get your API key from: [https://console.x.ai/](https://console.x.ai/)
+
+---
+
+## Supported Locations
+
+### Hierarchical (include subdivisions)
+- **Delmas** (includes Delmas 1-110, Delmas 19, Delmas 33, etc.)
+- **Tabarre** (includes Tabarre 19, Tabarre 33, etc.)
+- **Pétion-Ville** (includes Petionville, Petyonvil, PV)
+- **Croix-des-Bouquets** (includes Kwadebouke, Bon Repos)
+- **Pèlerin** (includes Pelerin)
+- **Thomassin**
+- **Canapé-Vert** (includes Kanapevè)
+- **Laboule** (includes Laboul)
+
+### Non-Hierarchical (treated separately)
+- **Carrefour** ≠ Carrefour Drouillard ≠ Carrefour Feuilles
+- **Martissant**
+- **Kenscoff**
+- **Okap** (Cap-Haïtien)
+- **Jérémie**
+
+---
+
+## Deployment
+
+### Backend Deployment (Vercel)
+
+1. Set environment variables in Vercel dashboard
+2. Deploy using `vercel.json` configuration
+3. Ensure MongoDB Atlas IP whitelist includes Vercel IPs
+
+### Frontend Deployment
+
+1. Build the application:
+   ```bash
+   cd "Web App"
+   npm run build
+   ```
+
+2. Deploy `dist/` folder to:
+   - Vercel
+   - Netlify
+   - Any static hosting service
+
+### Environment Setup
+
+Ensure all environment variables are configured in your deployment platform:
+- `GROK_TOKEN`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+
+---
+
+## Testing
+
+### Using Postman
+
+1. Import collection from `PatrolX/docs/PatrolX_API.postman_collection.json`
+2. Set environment variables:
+   - `base_url`: `http://localhost:5000`
+   - `token`: JWT token from sign-in
+
+### Using cURL
+
+**Sign Up:**
 ```bash
-# Terminal 1 : Frontend
-npm run dev
-
-# Terminal 2 : Backend (optionnel)
-npm run server
+curl -X POST http://localhost:5000/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","email":"test@example.com","password":"test123"}'
 ```
 
-L'application sera accessible sur `http://localhost:5173`
-
----
-
-## 🏗️ Architecture
-
-### Architecture générale
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Frontend (React)                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │   App    │──│  Layout  │──│  Routes  │              │
-│  └──────────┘  └──────────┘  └──────────┘              │
-│       │             │                                      │
-│  ┌────▼────┐  ┌────▼────┐  ┌────▼────┐                 │
-│  │  Store  │  │  MapView │  │  Chat   │                 │
-│  │(Zustand)│  │ (Leaflet)│  │   (IA)   │                 │
-│  └────┬────┘  └────┬────┘  └────┬────┘                 │
-└───────┼─────────────┼─────────────┼───────────────────────┘
-        │             │             │
-        └─────────────┴─────────────┘
-                      │
-              ┌───────▼────────┐
-              │   API Client   │
-              │    (Axios)     │
-              └───────┬────────┘
-                      │
-        ┌─────────────┴─────────────┐
-        │                           │
-┌───────▼────────┐        ┌────────▼────────┐
-│  Backend Proxy │        │  External API   │
-│   (Express)   │───────▶  (CTR Center)     │
-└────────────────┘        └─────────────────┘
-```
-
-### Flux de données
-
-1. **Authentification** : Login → JWT Token → Session Storage
-2. **Sélection de zone** : Clic sur carte → API Call → Store Update → Chat Update
-3. **Notifications** : WebSocket/Polling → Store Update → UI Update
-4. **Chat IA** : Message utilisateur → API Call → Réponse IA → Store Update
-
----
-
-## Technologies
-
-### Frontend
-
-| Technologie | Version | Usage |
-|------------|---------|-------|
-| **React** | 18.2.0 | Framework UI |
-| **Vite** | 5.0.8 | Build tool & Dev server |
-| **React Router** | 7.9.6 | Routing & Navigation |
-| **Zustand** | 4.4.7 | State management |
-| **TailwindCSS** | 3.3.6 | Styling |
-| **React Leaflet** | 4.2.1 | Cartographie |
-| **Axios** | 1.6.2 | HTTP Client |
-| **Framer Motion** | 10.16.16 | Animations |
-
-### Backend
-
-| Technologie | Version | Usage |
-|------------|---------|-------|
-| **Express** | 4.21.2 | Server framework |
-| **Axios** | 1.6.2 | HTTP Client |
-| **CORS** | 2.8.5 | Cross-origin requests |
-| **dotenv** | 17.2.3 | Environment variables |
-
-### Outils de développement
-
-- **ESLint** - Linting
-- **PostCSS** - CSS processing
-- **Autoprefixer** - CSS vendor prefixes
-
----
-
-## Documentation
-
-### Documentation complète
-
-- [**API.md**](./docs/API.md) - Documentation complète de l'API
-
-### Guides rapides
-
-- [Installation rapide](#-installation)
-- [Configuration](#-configuration)
-- [Déploiement](#-déploiement)
-
----
-
-## 📂 Structure du projet
-
-```
-patrol-x/
-├── backend/                 # Serveur Express (proxy API)
-│   └── server.js           # Configuration serveur
-├── public/                  # Assets statiques
-│   └── assets/
-│       └── logo.svg        # Logo Patrol-X
-├── src/
-│   ├── api/                # Couche API
-│   │   └── api.js          # Client Axios & endpoints
-│   ├── components/         # Composants React
-│   │   ├── Layout.jsx      # Layout principal
-│   │   ├── MapView.jsx     # Carte interactive
-│   │   ├── Chat.jsx        # Interface chat
-│   │   ├── ChatMessage.jsx # Composant message
-│   │   ├── SidebarPriority.jsx # Sidebar priorités
-│   │   ├── NotificationButton.jsx # Bouton notifications
-│   │   ├── Login.jsx       # Page de connexion
-│   │   ├── Signup.jsx      # Page d'inscription
-│   │   └── ...             # Autres composants
-│   ├── context/            # State management
-│   │   └── store.js        # Store Zustand
-│   ├── hooks/              # Hooks personnalisés
-│   │   ├── useDebounce.js  # Debounce hook
-│   │   ├── useOnlineStatus.js # Statut en ligne
-│   │   ├── useSessionTimeout.js # Timeout session
-│   │   └── useTypingEffect.js # Effet de frappe
-│   ├── utils/              # Utilitaires
-│   │   ├── storage.js      # SafeStorage wrapper
-│   │   ├── errors.js       # Gestion d'erreurs
-│   │   ├── communesData.js # Données géographiques
-│   │   ├── mapBounds.js    # Limites de carte
-│   │   └── markdown.jsx    # Parser Markdown
-│   ├── styles/              # Styles CSS
-│   │   └── leaflet.css     # Styles Leaflet
-│   ├── App.jsx              # Composant racine
-│   ├── main.jsx             # Point d'entrée
-│   └── index.css            # Styles globaux
-├── .env                     # Variables d'environnement
-├── .gitignore               # Fichiers ignorés
-├── package.json             # Dépendances
-├── tailwind.config.js       # Config Tailwind
-├── vite.config.js           # Config Vite
-└── README.md                # Ce fichier
-```
-
----
-
-## Configuration
-
-### Variables d'environnement
-
-#### Frontend (`.env`)
-
-```env
-# URL de l'API backend
-VITE_API_URL=http://localhost:3000
-
-# URL de l'API externe (CTR Center)
-VITE_API_CTR_CENTER_URL=https://px-rho.vercel.app
-
-# Endpoints spécifiques
-VITE_API_CTR_CENTER_URL_ENDPOINT=/api/events/latest
-VITE_API_CTR_CENTER_URL_LOCATION_ENDPOINT=/api/zone
-VITE_API_CTR_CENTER_URL_CHAT_ENDPOINT=/chat
-```
-
-#### Backend (`.env`)
-
-```env
-# Port du serveur
-PORT=3000
-
-# Cache TTL pour les événements (ms)
-EVENTS_CACHE_TTL_MS=5000
-
-# URLs API externes
-VITE_API_CTR_CENTER_URL=https://px-rho.vercel.app
-VITE_API_CTR_CENTER_URL_ENDPOINT=/api/events/latest
-```
-
-### Configuration Tailwind
-
-Le fichier `tailwind.config.js` contient :
-- Couleurs personnalisées (neon-green, neon-cyan)
-- Animations personnalisées
-- Classes utilitaires
-
-### Configuration Vite
-
-Le fichier `vite.config.js` configure :
-- Plugin React
-- Alias de chemins
-- Optimisations de build
-
----
-
-## Développement
-
-### Scripts disponibles
-
+**Sign In:**
 ```bash
-# Développement
-npm run dev          # Démarrer le serveur de dev (port 5173)
-
-# Build
-npm run build        # Build de production
-npm run preview      # Prévisualiser le build
-
-# Backend
-npm run server       # Démarrer le serveur Express (port 3000)
+curl -X POST http://localhost:5000/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"test123"}'
 ```
 
-### Standards de code
-
-- **ESLint** pour le linting
-- **Prettier** (recommandé) pour le formatage
-- **Conventions React** : PascalCase pour les composants
-- **Conventions CSS** : BEM-like avec Tailwind
-
-### Workflow de développement
-
-1. Créer une branche depuis `main`
-2. Développer la fonctionnalité
-3. Tester localement
-4. Créer une Pull Request
-5. Code review et merge
-
----
-
-## Déploiement
-
-### Build de production
-
+**Process Messages:**
 ```bash
-npm run build
+curl -X POST http://localhost:5000/messages \
+  -H "Content-Type: application/json" \
+  -d @data/whatsapp_messages.json
 ```
 
-Les fichiers optimisés seront générés dans le dossier `dist/`.
+---
 
-### Déploiement sur Vercel
+## 🔒 Security
 
-1. Connecter le repository GitHub à Vercel
-2. Configurer les variables d'environnement
-3. Déployer automatiquement
+### Authentication
+- **JWT Tokens**: 7-day expiration
+- **Password Hashing**: bcrypt with salt
+- **Session Management**: Active sessions tracked in database
 
-### Déploiement sur Netlify
-
-1. Build command : `npm run build`
-2. Publish directory : `dist`
-3. Configurer les variables d'environnement
+### API Security
+- **CORS**: Configured for production origins
+- **Token Validation**: All protected endpoints require valid JWT token
+- **Password Requirements**: Enforced in frontend
 
 ---
 
-## Communes disponibles
+## Troubleshooting
 
-La carte affiche les **7 principales communes** de Port-au-Prince :
+### Common Issues
 
-| Commune | Population | Couleur |
-|---------|-----------|---------|
-| **Delmas** | 395,260 | 🔵 Bleu |
-| **Pétion-Ville** | 283,052 | 🟢 Vert |
-| **Croix-des-Bouquets** | 229,127 | 🟡 Jaune |
-| **Carrefour** | 465,019 | 🟠 Orange |
-| **Port-au-Prince** | 987,310 | 🔴 Rouge |
-| **Cité Soleil** | 241,093 | 🟣 Violet |
-| **Tabarre** | 118,477 | ⚪ Gris |
+1. **Grok AI API Error**
+   - Verify `GROK_TOKEN` is set correctly
+   - Check API key permissions at [console.x.ai](https://console.x.ai/)
+   - Verify API quota/limits
 
----
+2. **MongoDB Connection Error**
+   - Check `DB_USERNAME` and `DB_PASSWORD` environment variables
+   - Verify MongoDB Atlas IP whitelist
+   - Check network connectivity
 
-## Contribution
+3. **JWT Token Invalid**
+   - Check `JWT_SECRET` is set
+   - Verify token hasn't expired (7 days)
+   - Ensure token is sent in `Authorization: Bearer <token>` header
 
-Les contributions sont les bienvenues ! Merci de :
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+4. **Frontend API Connection Error**
+   - Verify `VITE_API_CTR_CENTER_URL` is correct
+   - Check CORS configuration on backend
+   - Verify backend is running
 
 ---
 
-## 📝 Licence
+## Contributing
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow existing code style and conventions
+- Write clear commit messages
+- Test your changes thoroughly
+- Update documentation as needed
 
 ---
 
-## Auteurs
 
-- **Équipe Patrol-X** - Développement initial
-    **Rockson NOEL**
+## Team
+
+**Patrol-X Team** - Hackathon Ayiti-ai 2025
+
+This project was developed by a team of three developers with the following division of roles:
+
+---
+
+- **Ralph Djino DUMERA**
+
+  - **Primary Role:** AI Specialist / Full Stack Developer
+
+  - **Contributions:**
+
+    - Design and development of the **Backend API** (Flask/Python) for event processing and analysis.
+
+    - Implementation of **Grok AI integration** for message preprocessing, event extraction, and chat functionality.
+
+    - Development of **AI services pipeline** including sentiment analysis, event classification, and structured data extraction.
+
+    - Design and implementation of **MongoDB database models** and query logic.
+
+    - Management of backend infrastructure, authentication system (JWT), and API endpoints.
+
+  - **Component:** PatrolX (Backend API)
+
+  - **GitHub:** [ralphy89](https://github.com/ralphy89)
+
+---
+
+- **Rockson NOEL**
+
+  - **Primary Role:** Frontend Engineer / Full Stack Developer
+
+  - **Contributions:**
+
+    - Design and development of the **Web Application** (React/Vite) with interactive map visualization.
+
+    - Implementation of **React Leaflet** integration for real-time event mapping across Port-au-Prince communes.
+
+    - Development of **AI Chat Interface** with typing effects and markdown support.
+
+    - Design and implementation of **Notification System** UI with real-time updates.
+
+    - Frontend state management with **Zustand**, authentication flow, and responsive design.
+
+  - **Component:** Web App (Frontend)
+
+  - **GitHub:** [noelRockson](https://github.com/noelRockson)
+
+---
+
+- **Stephane LAINÉ**
+
+  - **Primary Role:** Data Engineer / Automation Specialist
+
+  - **Contributions:**
+
+    - Development of **WhatsApp Channel Scraper** using Selenium and Firefox automation.
+
+    - Implementation of **message extraction pipeline** from WhatsApp Web channels.
+
+    - Design and development of **batch message sender** for API integration.
+
+    - Automation of data collection workflows and message format conversion.
+
+  - **Component:** Data Collector
+
+  - **GitHub:** [stephLaine](https://github.com/stephLaine)
+
+---
+
+## Acknowledgments
+
+Built for the people of Haiti 🇭🇹
+
+**Patrol-X** - Turning chaos into clarity
+
+---
+
+## 📖 Additional Documentation
+
+- [Backend API Documentation](./PatrolX/README.md)
+- [Frontend Web App Documentation](./Web%20App/README.md)
+- [Data Collector Documentation](./data_colector/readme.md)
+- [API Full Documentation](./PatrolX/docs/API_DOCUMENTATION.md)
+- [API Quick Reference](./PatrolX/docs/API_QUICK_REFERENCE.md)
 
 ---
 
 <div align="center">
 
-**Developer dans le cadre d'un Hackathon (AyitiAi) avec l'équipe Patrol-X**
+**Made with ❤️ for Haiti**
 
-[Documentation](#-documentation) • [Issues](https://github.com/votre-username/patrol-x/issues) • [Discussions](https://github.com/votre-username/patrol-x/discussions)
+[Documentation](#-table-of-contents) • [API Docs](./PatrolX/docs/API_DOCUMENTATION.md) • [Web App](./Web%20App/README.md)
 
 </div>
+
