@@ -147,7 +147,7 @@ const Signup = () => {
       {/* Bouton toggle dark/light mode */}
       <button
         onClick={toggleDarkMode}
-        className="absolute top-4 right-4 p-2 text-emerald-600 dark:text-neon-green/70 hover:text-emerald-700 dark:hover:text-neon-green hover:bg-emerald-50 dark:hover:bg-neon-green/10 border border-transparent hover:border-emerald-300 dark:hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-neon-green/50 hover:shadow-md dark:hover:shadow-neon-green z-20"
+        className="absolute top-12 right-4 p-2 text-emerald-600 dark:text-neon-green/70 hover:text-emerald-700 dark:hover:text-neon-green hover:bg-emerald-50 dark:hover:bg-neon-green/10 border border-transparent hover:border-emerald-300 dark:hover:border-neon-green/30 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-neon-green/50 hover:shadow-md dark:hover:shadow-neon-green z-20"
         aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}
       >
         {isDarkMode ? (

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout'
 import Login from './components/Login'
 import Signup from './components/Signup'
+import PrototypeBanner from './components/PrototypeBanner'
 import { useStore } from './context/store'
 import './index.css'
 
@@ -16,6 +17,7 @@ function App() {
   return (
     <Router>
     <div className="App">
+        <PrototypeBanner />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
